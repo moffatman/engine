@@ -64,8 +64,18 @@ enum PointerSignalKind {
   /// A pointer-generated scroll (e.g., mouse wheel or trackpad scroll).
   scroll,
 
+  /// A pointer-generated gesture (e.g. trackpad zoom, pan)
+  platformGesture,
+
   /// An unknown pointer signal kind.
   unknown
+}
+
+enum PointerPlatformGesturePhase {
+	none,
+	begin,
+	update,
+	end
 }
 
 /// Information about the state of a pointer.
@@ -101,6 +111,13 @@ class PointerData {
     this.platformData = 0,
     this.scrollDeltaX = 0.0,
     this.scrollDeltaY = 0.0,
+    this.gesturePhase = PointerPlatformGesturePhase.none,
+    this.panX = 0.0,
+    this.panY = 0.0,
+    this.panDeltaX = 0.0,
+    this.panDeltaY = 0.0,
+    this.zoomScale = 0.0,
+    this.rotateRadians = 0.0,
   });
 
   /// Unique identifier that ties the [PointerEvent] to embedder event created it.
@@ -265,6 +282,14 @@ class PointerData {
   /// The amount to scroll in the y direction, in physical pixels.
   final double scrollDeltaY;
 
+  final PointerPlatformGesturePhase gesturePhase;
+  final double panX;
+  final double panY;
+  final double panDeltaX;
+  final double panDeltaY;
+  final double rotateRadians;
+  final double zoomScale;
+
   @override
   String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
 
@@ -298,7 +323,11 @@ class PointerData {
              'tilt: $tilt, '
              'platformData: $platformData, '
              'scrollDeltaX: $scrollDeltaX, '
-             'scrollDeltaY: $scrollDeltaY'
+             'scrollDeltaY: $scrollDeltaY, '
+			 'panX: $panX, '
+			 'panY: $panY, '
+			 'rotateRadians: $rotateRadians, '
+			 'zoomScale: $zoomScale'
            ')';
   }
 }

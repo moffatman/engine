@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 
+#include <cmath>
 #include <cstring>
 
 #include "flutter/fml/logging.h"
@@ -248,6 +249,41 @@ void PointerDataPacketConverter::ConvertPointerData(
         converted_pointers.push_back(pointer_data);
         break;
       }
+      case PointerData::SignalKind::kPlatformGesture: {
+
+        // Makes sure we have an existing pointer
+        auto iter = states_.find(pointer_data.device);
+        PointerState state;
+        if (iter == states_.end()) {
+          // Synthesizes add event if the pointer is not previously added.
+          PointerData synthesized_add_event = pointer_data;
+          synthesized_add_event.change = PointerData::Change::kAdd;
+          synthesized_add_event.synthesized = 1;
+          synthesized_add_event.buttons = 0;
+          state = EnsurePointerState(synthesized_add_event);
+          converted_pointers.push_back(synthesized_add_event);
+        } else {
+          state = iter->second;
+        }
+        // Split into ~1 px chunks
+        int max_step = std::max(1, (int)std::ceil(std::fmax(std::abs(pointer_data.pan_delta_x), std::abs(pointer_data.pan_delta_y))));
+        double pan_step_x = pointer_data.pan_delta_x / max_step;
+        double pan_step_y = pointer_data.pan_delta_y / max_step;
+        double pan_x = pointer_data.pan_x - pointer_data.pan_delta_x;
+        double pan_y = pointer_data.pan_y - pointer_data.pan_delta_y;
+        for (int i = 0; i < max_step; i++) {
+          pan_x += pan_step_x;
+          pan_y += pan_step_y;
+          PointerData synthesized_event = pointer_data;
+          synthesized_event.pan_delta_x = pan_step_x;
+          synthesized_event.pan_delta_y = pan_step_y;
+          synthesized_event.pan_x = pan_x;
+          synthesized_event.pan_y = pan_y;
+          synthesized_event.synthesized = i != 0; // Mark the first as "real" to allow velocity trackers to work
+          converted_pointers.push_back(synthesized_event);
+        }
+        break;
+      }
       default: {
         // Ignores unknown signal kind.
         break;
@@ -263,6 +299,8 @@ PointerState PointerDataPacketConverter::EnsurePointerState(
   state.is_down = false;
   state.physical_x = pointer_data.physical_x;
   state.physical_y = pointer_data.physical_y;
+  state.pan_x = pointer_data.pan_x;
+  state.pan_y = pointer_data.pan_y;
   states_[pointer_data.device] = state;
   return state;
 }
@@ -271,8 +309,12 @@ void PointerDataPacketConverter::UpdateDeltaAndState(PointerData& pointer_data,
                                                      PointerState& state) {
   pointer_data.physical_delta_x = pointer_data.physical_x - state.physical_x;
   pointer_data.physical_delta_y = pointer_data.physical_y - state.physical_y;
+  pointer_data.pan_delta_x = pointer_data.pan_x - state.pan_x;
+  pointer_data.pan_delta_y = pointer_data.pan_y - state.pan_y;
   state.physical_x = pointer_data.physical_x;
   state.physical_y = pointer_data.physical_y;
+  state.pan_x = pointer_data.pan_x;
+  state.pan_y = pointer_data.pan_y;
   states_[pointer_data.device] = state;
 }
 

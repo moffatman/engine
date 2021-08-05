@@ -50,15 +50,26 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerSignalKind enum in pointer.dart.
-  @IntDef({PointerSignalKind.NONE, PointerSignalKind.SCROLL, PointerSignalKind.UNKNOWN})
+  @IntDef({PointerSignalKind.NONE, PointerSignalKind.SCROLL, PointerSignalKind.PAN_GESTURE, PointerSignalKind.ZOOM_ROTATE_GESTURE, PointerSignalKind.UNKNOWN})
   private @interface PointerSignalKind {
     int NONE = 0;
     int SCROLL = 1;
-    int UNKNOWN = 2;
+    int PAN_GESTURE = 2;
+    int ZOOM_ROTATE_GESTURE = 3;
+    int UNKNOWN = 4;
+  }
+
+  // Must match the PointerSignalPhase enum in pointer.dart.
+  @IntDef({PointerSignalPhase.NONE, PointerSignalPhase.BEGIN, PointerSignalPhase.UPDATE, PointerSignalPhase.END})
+  private @interface PointerSignalPhase {
+    int NONE = 0;
+    int BEGIN = 1;
+    int UPDATE = 2;
+    int END = 3;
   }
 
   // Must match the unpacking code in hooks.dart.
-  private static final int POINTER_DATA_FIELD_COUNT = 29;
+  private static final int POINTER_DATA_FIELD_COUNT = 36;
   private static final int BYTES_PER_FIELD = 8;
 
   // This value must match the value in framework's platform_view.dart.
@@ -308,6 +319,14 @@ public class AndroidTouchProcessor {
       packet.putDouble(0.0); // scroll_delta_x
       packet.putDouble(0.0); // scroll_delta_x
     }
+
+    packet.putLong(0); // gesture_phase
+    packet.putDouble(0.0); // pan_x
+    packet.putDouble(0.0); // pan_y
+    packet.putDouble(0.0); // pan_delta_x
+    packet.putDouble(0.0); // pan_delta_y
+    packet.putDouble(0.0); // rotate_radians
+    packet.putDouble(0.0); // zoom_scale
   }
 
   @PointerChange

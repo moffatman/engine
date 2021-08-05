@@ -639,6 +639,42 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
+void fl_engine_send_platform_gesture_event(FlEngine* self,
+                                           int64_t device,
+                                           size_t timestamp,
+                                           double x,
+                                           double y,
+                                           FlutterPointerPlatformGesturePhase gesture_phase,
+                                           double pan_x,
+                                           double pan_y,
+                                           double pan_delta_x,
+                                           double pan_delta_y,
+                                           double rotate_radians,
+                                           double zoom_scale) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent fl_event = {};
+  fl_event.struct_size = sizeof(fl_event);
+  fl_event.timestamp = timestamp;
+  fl_event.x = x;
+  fl_event.y = y;
+  fl_event.signal_kind = kFlutterPointerSignalKindPlatformGesture;
+  fl_event.gesture_phase = gesture_phase;
+  fl_event.pan_x = pan_x;
+  fl_event.pan_y = pan_y;
+  fl_event.pan_delta_x = pan_delta_x;
+  fl_event.pan_delta_y = pan_delta_y;
+  fl_event.rotate_radians = rotate_radians;
+  fl_event.zoom_scale = zoom_scale;
+  fl_event.device = device;
+  fl_event.device_kind = kFlutterPointerDeviceKindMouse;
+  self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
+}
+
 void fl_engine_send_key_event(FlEngine* self,
                               const FlutterKeyEvent* event,
                               FlutterKeyEventCallback callback,

@@ -163,6 +163,19 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         double scroll_delta_y,
                                         int64_t buttons);
 
+void fl_engine_send_platform_gesture_event(FlEngine* self,
+                                           int64_t device,
+                                           size_t timestamp,
+                                           double x,
+                                           double y,
+                                           FlutterPointerPlatformGesturePhase gesture_phase,
+                                           double pan_x,
+                                           double pan_y,
+                                           double pan_delta_x,
+                                           double pan_delta_y,
+                                           double rotate_radians,
+                                           double zoom_scale);
+
 /**
  * fl_engine_send_key_event:
  */

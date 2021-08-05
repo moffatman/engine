@@ -39,6 +39,17 @@ struct _FlView {
   // Pointer button state recorded for sending status updates.
   int64_t button_state;
 
+  gdouble last_x;
+  gdouble last_y;
+
+  gboolean pan_started;
+  gdouble pan_x;
+  gdouble pan_y;
+  
+  gboolean zoom_rotate_started;
+  gdouble rotate_radians;
+  gdouble zoom_scale;
+
   // Flutter system channel handlers.
   FlAccessibilityPlugin* accessibility_plugin;
   FlKeyboardManager* keyboard_manager;
@@ -125,6 +136,8 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
   }
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  self->last_x = event->x * scale_factor;
+  self->last_y = event->y * scale_factor;
   fl_engine_send_mouse_pointer_event(
       self->engine, phase, event->time * kMicrosecondsPerMillisecond,
       event->x * scale_factor, event->y * scale_factor, 0, 0,
@@ -190,6 +203,31 @@ static gboolean event_box_leave_notify_event(GtkWidget* widget,
                                              GdkEventCrossing* event,
                                              FlView* view);
 
+static void event_box_gesture_rotation_begin(GtkGestureRotate* gesture,
+                                             GdkEventSequence* sequence,
+                                             FlView* view);
+
+static void event_box_gesture_rotation_update(GtkGestureRotate* widget,
+                                              gdouble angle,
+                                              gdouble delta,
+                                              FlView* view);
+
+static void event_box_gesture_rotation_end(GtkGestureRotate* gesture,
+                                           GdkEventSequence* sequence,
+                                           FlView* view);
+
+static void event_box_gesture_zoom_begin(GtkGestureZoom* gesture,
+                                         GdkEventSequence* sequence,
+                                         FlView* view);
+
+static void event_box_gesture_zoom_update(GtkGestureZoom* widget,
+                                          gdouble scale,
+                                          FlView* view);
+
+static void event_box_gesture_zoom_end(GtkGestureZoom* gesture,
+                                       GdkEventSequence* sequence,
+                                       FlView* view);
+
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
@@ -234,6 +272,14 @@ static void fl_view_constructed(GObject* object) {
                    G_CALLBACK(event_box_enter_notify_event), self);
   g_signal_connect(self->event_box, "leave-notify-event",
                    G_CALLBACK(event_box_leave_notify_event), self);
+  GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
+  g_signal_connect(zoom, "begin", G_CALLBACK(event_box_gesture_zoom_begin), self);
+  g_signal_connect(zoom, "scale-changed", G_CALLBACK(event_box_gesture_zoom_update), self);
+  g_signal_connect(zoom, "end", G_CALLBACK(event_box_gesture_zoom_end), self);
+  GtkGesture* rotate = gtk_gesture_rotate_new(self->event_box);
+  g_signal_connect(rotate, "begin", G_CALLBACK(event_box_gesture_rotation_begin), self);
+  g_signal_connect(rotate, "angle-changed", G_CALLBACK(event_box_gesture_rotation_update), self);
+  g_signal_connect(rotate, "end", G_CALLBACK(event_box_gesture_rotation_end), self);
 }
 
 static void fl_view_set_property(GObject* object,
@@ -495,18 +541,65 @@ static gboolean event_box_scroll_event(GtkWidget* widget,
     scroll_delta_x = 1;
   }
 
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+
   // The multiplier is taken from the Chromium source
   // (ui/events/x/events_x_utils.cc).
   const int kScrollOffsetMultiplier = 53;
-  scroll_delta_x *= kScrollOffsetMultiplier;
-  scroll_delta_y *= kScrollOffsetMultiplier;
+  scroll_delta_x *= kScrollOffsetMultiplier * scale_factor;
+  scroll_delta_y *= kScrollOffsetMultiplier * scale_factor;
 
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
-  fl_engine_send_mouse_pointer_event(
-      view->engine, view->button_state != 0 ? kMove : kHover,
-      event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
-      event->y * scale_factor, scroll_delta_x, scroll_delta_y,
-      view->button_state);
+  if (gdk_device_get_source(gdk_event_get_source_device((GdkEvent*)event)) == GDK_SOURCE_TOUCHPAD) {
+    scroll_delta_x *= -1;
+    scroll_delta_y *= -1;
+    if (event->is_stop) {
+      view->pan_x += scroll_delta_x;
+      view->pan_y += scroll_delta_y;
+      fl_engine_send_platform_gesture_event(
+        view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+        event->x * scale_factor, event->y * scale_factor,
+        kFlutterPointerPlatformGesturePhaseUpdate,
+        view->pan_x, view->pan_y, scroll_delta_x, scroll_delta_y, 0, 1
+      );
+      fl_engine_send_platform_gesture_event(
+        view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+        event->x * scale_factor, event->y * scale_factor,
+        kFlutterPointerPlatformGesturePhaseEnd,
+        view->pan_x, view->pan_y, 0, 0, 0, 0
+      );
+      view->pan_started = FALSE;
+    }
+    else {
+      if (!view->pan_started) {
+        view->pan_x = 0;
+        view->pan_y = 0;
+        fl_engine_send_platform_gesture_event(
+          view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+          event->x * scale_factor, event->y * scale_factor,
+          kFlutterPointerPlatformGesturePhaseBegin,
+          0, 0, 0, 0, 0, 0
+        );
+        view->pan_started = TRUE;
+      }
+      view->pan_x += scroll_delta_x;
+      view->pan_y += scroll_delta_y;
+      fl_engine_send_platform_gesture_event(
+        view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+        event->x * scale_factor, event->y * scale_factor,
+        kFlutterPointerPlatformGesturePhaseUpdate,
+        view->pan_x, view->pan_y, scroll_delta_x, scroll_delta_y, 0, 1
+      );
+    }
+  }
+  else {
+    view->last_x = event->x * scale_factor;
+    view->last_y = event->y * scale_factor;
+    fl_engine_send_mouse_pointer_event(
+        view->engine, view->button_state != 0 ? kMove : kHover,
+        event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
+        event->y * scale_factor, scroll_delta_x, scroll_delta_y,
+        view->button_state);
+  }
 
   return TRUE;
 }
@@ -518,7 +611,8 @@ static void check_pointer_inside(FlView* view, GdkEvent* event) {
     gdouble x, y;
     if (gdk_event_get_coords(event, &x, &y)) {
       gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
-
+      view->last_x = x * scale_factor;
+      view->last_y = y * scale_factor;
       fl_engine_send_mouse_pointer_event(
           view->engine, kAdd,
           gdk_event_get_time(event) * kMicrosecondsPerMillisecond,
@@ -537,6 +631,8 @@ static gboolean event_box_motion_notify_event(GtkWidget* widget,
   check_pointer_inside(view, reinterpret_cast<GdkEvent*>(event));
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+  view->last_x = event->x * scale_factor;
+  view->last_y = event->y * scale_factor;
   fl_engine_send_mouse_pointer_event(
       view->engine, view->button_state != 0 ? kMove : kHover,
       event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
@@ -569,6 +665,8 @@ static gboolean event_box_leave_notify_event(GtkWidget* widget,
   // release.
   if (view->pointer_inside && view->button_state == 0) {
     gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+    view->last_x = event->x * scale_factor;
+    view->last_y = event->y * scale_factor;
     fl_engine_send_mouse_pointer_event(
         view->engine, kRemove, event->time * kMicrosecondsPerMillisecond,
         event->x * scale_factor, event->y * scale_factor, 0, 0,
@@ -577,6 +675,91 @@ static gboolean event_box_leave_notify_event(GtkWidget* widget,
   }
 
   return TRUE;
+}
+
+static void event_box_gesture_rotation_begin(GtkGestureRotate* gesture,
+                                             GdkEventSequence* sequence,
+                                             FlView* view) {
+  if (!view->zoom_rotate_started) {
+    view->zoom_rotate_started = true;
+    view->zoom_scale = 1;
+    view->rotate_radians = 0;
+    fl_engine_send_platform_gesture_event(
+      view->engine, 123123, g_get_real_time(),
+      view->last_x, view->last_y,
+      kFlutterPointerPlatformGesturePhaseBegin,
+      0, 0, 0, 0, 0, 0
+    );
+  }
+}
+
+static void event_box_gesture_rotation_update(GtkGestureRotate* widget,
+                                              gdouble angle,
+                                              gdouble delta,
+                                              FlView* view) {
+  view->rotate_radians = angle;
+  fl_engine_send_platform_gesture_event(
+    view->engine, 123123, g_get_real_time(),
+    view->last_x, view->last_y,
+    kFlutterPointerPlatformGesturePhaseUpdate,
+    0, 0, 0, 0, view->rotate_radians, view->zoom_scale
+  );
+}
+
+static void event_box_gesture_rotation_end(GtkGestureRotate* gesture,
+                                           GdkEventSequence* sequence,
+                                           FlView* view) {
+  if (view->zoom_rotate_started) {
+    view->zoom_rotate_started = false;
+    fl_engine_send_platform_gesture_event(
+      view->engine, 123123, g_get_real_time(),
+      view->last_x, view->last_y,
+      kFlutterPointerPlatformGesturePhaseEnd,
+      0, 0, 0, 0, 0, 0
+    );
+  }
+}
+
+static void event_box_gesture_zoom_begin(GtkGestureZoom* gesture,
+                                         GdkEventSequence* sequence,
+                                         FlView* view) {
+  if (!view->zoom_rotate_started) {
+    view->zoom_rotate_started = true;
+    view->zoom_scale = 1;
+    view->rotate_radians = 0;
+    fl_engine_send_platform_gesture_event(
+      view->engine, 123123, g_get_real_time(),
+      view->last_x, view->last_y,
+      kFlutterPointerPlatformGesturePhaseBegin,
+      0, 0, 0, 0, 0, 0
+    );
+  }
+}
+
+static void event_box_gesture_zoom_update(GtkGestureZoom* widget,
+                                          gdouble scale,
+                                          FlView* view) {
+  view->zoom_scale = scale;
+  fl_engine_send_platform_gesture_event(
+    view->engine, 123123, g_get_real_time(),
+    view->last_x, view->last_y,
+    kFlutterPointerPlatformGesturePhaseUpdate,
+    0, 0, 0, 0, view->rotate_radians, view->zoom_scale
+  );
+}
+
+static void event_box_gesture_zoom_end(GtkGestureZoom* gesture,
+                                       GdkEventSequence* sequence,
+                                       FlView* view) {
+  if (view->zoom_rotate_started) {
+    view->zoom_rotate_started = false;
+    fl_engine_send_platform_gesture_event(
+      view->engine, 123123, g_get_real_time(),
+      view->last_x, view->last_y,
+      kFlutterPointerPlatformGesturePhaseEnd,
+      0, 0, 0, 0, 0, 0
+    );
+  }
 }
 
 // Implements GtkWidget::key_press_event.

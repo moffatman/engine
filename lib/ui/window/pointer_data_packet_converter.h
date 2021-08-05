@@ -32,6 +32,8 @@ struct PointerState {
   bool is_down;
   double physical_x;
   double physical_y;
+  double pan_x;
+  double pan_y;
   int64_t buttons;
 };
 
