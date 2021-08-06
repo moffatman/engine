@@ -50,17 +50,26 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerSignalKind enum in pointer.dart.
-  @IntDef({PointerSignalKind.NONE, PointerSignalKind.SCROLL, PointerSignalKind.PAN_GESTURE, PointerSignalKind.ZOOM_ROTATE_GESTURE, PointerSignalKind.UNKNOWN})
+  @IntDef({
+    PointerSignalKind.NONE,
+    PointerSignalKind.SCROLL,
+    PointerSignalKind.PLATFORM_GESTURE,
+    PointerSignalKind.UNKNOWN
+  })
   private @interface PointerSignalKind {
     int NONE = 0;
     int SCROLL = 1;
-    int PAN_GESTURE = 2;
-    int ZOOM_ROTATE_GESTURE = 3;
+    int PLATFORM_GESTURE = 2;
     int UNKNOWN = 4;
   }
 
   // Must match the PointerSignalPhase enum in pointer.dart.
-  @IntDef({PointerSignalPhase.NONE, PointerSignalPhase.BEGIN, PointerSignalPhase.UPDATE, PointerSignalPhase.END})
+  @IntDef({
+    PointerSignalPhase.NONE,
+    PointerSignalPhase.BEGIN,
+    PointerSignalPhase.UPDATE,
+    PointerSignalPhase.END
+  })
   private @interface PointerSignalPhase {
     int NONE = 0;
     int BEGIN = 1;

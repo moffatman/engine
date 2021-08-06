@@ -45,7 +45,7 @@ struct _FlView {
   gboolean pan_started;
   gdouble pan_x;
   gdouble pan_y;
-  
+
   gboolean zoom_rotate_started;
   gdouble rotate_radians;
   gdouble zoom_scale;
@@ -273,13 +273,18 @@ static void fl_view_constructed(GObject* object) {
   g_signal_connect(self->event_box, "leave-notify-event",
                    G_CALLBACK(event_box_leave_notify_event), self);
   GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
-  g_signal_connect(zoom, "begin", G_CALLBACK(event_box_gesture_zoom_begin), self);
-  g_signal_connect(zoom, "scale-changed", G_CALLBACK(event_box_gesture_zoom_update), self);
+  g_signal_connect(zoom, "begin", G_CALLBACK(event_box_gesture_zoom_begin),
+                   self);
+  g_signal_connect(zoom, "scale-changed",
+                   G_CALLBACK(event_box_gesture_zoom_update), self);
   g_signal_connect(zoom, "end", G_CALLBACK(event_box_gesture_zoom_end), self);
   GtkGesture* rotate = gtk_gesture_rotate_new(self->event_box);
-  g_signal_connect(rotate, "begin", G_CALLBACK(event_box_gesture_rotation_begin), self);
-  g_signal_connect(rotate, "angle-changed", G_CALLBACK(event_box_gesture_rotation_update), self);
-  g_signal_connect(rotate, "end", G_CALLBACK(event_box_gesture_rotation_end), self);
+  g_signal_connect(rotate, "begin",
+                   G_CALLBACK(event_box_gesture_rotation_begin), self);
+  g_signal_connect(rotate, "angle-changed",
+                   G_CALLBACK(event_box_gesture_rotation_update), self);
+  g_signal_connect(rotate, "end", G_CALLBACK(event_box_gesture_rotation_end),
+                   self);
 }
 
 static void fl_view_set_property(GObject* object,
@@ -549,49 +554,43 @@ static gboolean event_box_scroll_event(GtkWidget* widget,
   scroll_delta_x *= kScrollOffsetMultiplier * scale_factor;
   scroll_delta_y *= kScrollOffsetMultiplier * scale_factor;
 
-  if (gdk_device_get_source(gdk_event_get_source_device((GdkEvent*)event)) == GDK_SOURCE_TOUCHPAD) {
+  if (gdk_device_get_source(gdk_event_get_source_device((GdkEvent*)event)) ==
+      GDK_SOURCE_TOUCHPAD) {
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
     if (event->is_stop) {
       view->pan_x += scroll_delta_x;
       view->pan_y += scroll_delta_y;
       fl_engine_send_platform_gesture_event(
-        view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-        event->x * scale_factor, event->y * scale_factor,
-        kFlutterPointerPlatformGesturePhaseUpdate,
-        view->pan_x, view->pan_y, scroll_delta_x, scroll_delta_y, 0, 1
-      );
+          view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+          event->x * scale_factor, event->y * scale_factor,
+          kFlutterPointerPlatformGesturePhaseUpdate, view->pan_x, view->pan_y,
+          scroll_delta_x, scroll_delta_y, 0, 1);
       fl_engine_send_platform_gesture_event(
-        view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-        event->x * scale_factor, event->y * scale_factor,
-        kFlutterPointerPlatformGesturePhaseEnd,
-        view->pan_x, view->pan_y, 0, 0, 0, 0
-      );
+          view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+          event->x * scale_factor, event->y * scale_factor,
+          kFlutterPointerPlatformGesturePhaseEnd, view->pan_x, view->pan_y, 0,
+          0, 0, 0);
       view->pan_started = FALSE;
-    }
-    else {
+    } else {
       if (!view->pan_started) {
         view->pan_x = 0;
         view->pan_y = 0;
         fl_engine_send_platform_gesture_event(
-          view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-          event->x * scale_factor, event->y * scale_factor,
-          kFlutterPointerPlatformGesturePhaseBegin,
-          0, 0, 0, 0, 0, 0
-        );
+            view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+            event->x * scale_factor, event->y * scale_factor,
+            kFlutterPointerPlatformGesturePhaseBegin, 0, 0, 0, 0, 0, 0);
         view->pan_started = TRUE;
       }
       view->pan_x += scroll_delta_x;
       view->pan_y += scroll_delta_y;
       fl_engine_send_platform_gesture_event(
-        view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-        event->x * scale_factor, event->y * scale_factor,
-        kFlutterPointerPlatformGesturePhaseUpdate,
-        view->pan_x, view->pan_y, scroll_delta_x, scroll_delta_y, 0, 1
-      );
+          view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
+          event->x * scale_factor, event->y * scale_factor,
+          kFlutterPointerPlatformGesturePhaseUpdate, view->pan_x, view->pan_y,
+          scroll_delta_x, scroll_delta_y, 0, 1);
     }
-  }
-  else {
+  } else {
     view->last_x = event->x * scale_factor;
     view->last_y = event->y * scale_factor;
     fl_engine_send_mouse_pointer_event(
@@ -685,11 +684,8 @@ static void event_box_gesture_rotation_begin(GtkGestureRotate* gesture,
     view->zoom_scale = 1;
     view->rotate_radians = 0;
     fl_engine_send_platform_gesture_event(
-      view->engine, 123123, g_get_real_time(),
-      view->last_x, view->last_y,
-      kFlutterPointerPlatformGesturePhaseBegin,
-      0, 0, 0, 0, 0, 0
-    );
+        view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
+        kFlutterPointerPlatformGesturePhaseBegin, 0, 0, 0, 0, 0, 0);
   }
 }
 
@@ -699,11 +695,9 @@ static void event_box_gesture_rotation_update(GtkGestureRotate* widget,
                                               FlView* view) {
   view->rotate_radians = angle;
   fl_engine_send_platform_gesture_event(
-    view->engine, 123123, g_get_real_time(),
-    view->last_x, view->last_y,
-    kFlutterPointerPlatformGesturePhaseUpdate,
-    0, 0, 0, 0, view->rotate_radians, view->zoom_scale
-  );
+      view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
+      kFlutterPointerPlatformGesturePhaseUpdate, 0, 0, 0, 0,
+      view->rotate_radians, view->zoom_scale);
 }
 
 static void event_box_gesture_rotation_end(GtkGestureRotate* gesture,
@@ -712,11 +706,8 @@ static void event_box_gesture_rotation_end(GtkGestureRotate* gesture,
   if (view->zoom_rotate_started) {
     view->zoom_rotate_started = false;
     fl_engine_send_platform_gesture_event(
-      view->engine, 123123, g_get_real_time(),
-      view->last_x, view->last_y,
-      kFlutterPointerPlatformGesturePhaseEnd,
-      0, 0, 0, 0, 0, 0
-    );
+        view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
+        kFlutterPointerPlatformGesturePhaseEnd, 0, 0, 0, 0, 0, 0);
   }
 }
 
@@ -728,11 +719,8 @@ static void event_box_gesture_zoom_begin(GtkGestureZoom* gesture,
     view->zoom_scale = 1;
     view->rotate_radians = 0;
     fl_engine_send_platform_gesture_event(
-      view->engine, 123123, g_get_real_time(),
-      view->last_x, view->last_y,
-      kFlutterPointerPlatformGesturePhaseBegin,
-      0, 0, 0, 0, 0, 0
-    );
+        view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
+        kFlutterPointerPlatformGesturePhaseBegin, 0, 0, 0, 0, 0, 0);
   }
 }
 
@@ -741,11 +729,9 @@ static void event_box_gesture_zoom_update(GtkGestureZoom* widget,
                                           FlView* view) {
   view->zoom_scale = scale;
   fl_engine_send_platform_gesture_event(
-    view->engine, 123123, g_get_real_time(),
-    view->last_x, view->last_y,
-    kFlutterPointerPlatformGesturePhaseUpdate,
-    0, 0, 0, 0, view->rotate_radians, view->zoom_scale
-  );
+      view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
+      kFlutterPointerPlatformGesturePhaseUpdate, 0, 0, 0, 0,
+      view->rotate_radians, view->zoom_scale);
 }
 
 static void event_box_gesture_zoom_end(GtkGestureZoom* gesture,
@@ -754,11 +740,8 @@ static void event_box_gesture_zoom_end(GtkGestureZoom* gesture,
   if (view->zoom_rotate_started) {
     view->zoom_rotate_started = false;
     fl_engine_send_platform_gesture_event(
-      view->engine, 123123, g_get_real_time(),
-      view->last_x, view->last_y,
-      kFlutterPointerPlatformGesturePhaseEnd,
-      0, 0, 0, 0, 0, 0
-    );
+        view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
+        kFlutterPointerPlatformGesturePhaseEnd, 0, 0, 0, 0, 0, 0);
   }
 }
 

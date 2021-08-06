@@ -114,7 +114,8 @@ typedef enum UIAccessibilityContrast : NSInteger {
   fml::scoped_nsobject<UIPointerInteraction> _pointerInteraction API_AVAILABLE(ios(13.4));
   fml::scoped_nsobject<UIPanGestureRecognizer> _panGestureRecognizer API_AVAILABLE(ios(13.4));
   fml::scoped_nsobject<UIPinchGestureRecognizer> _pinchGestureRecognizer API_AVAILABLE(ios(13.4));
-  fml::scoped_nsobject<UIRotationGestureRecognizer> _rotationGestureRecognizer API_AVAILABLE(ios(13.4));
+  fml::scoped_nsobject<UIRotationGestureRecognizer> _rotationGestureRecognizer
+      API_AVAILABLE(ios(13.4));
   MouseState _mouseState;
 }
 
@@ -1600,9 +1601,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return nil;
 }
 
- - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return YES;
- }
+- (BOOL)gestureRecognizer:(UIGestureRecognizer*)gestureRecognizer
+    shouldRecognizeSimultaneouslyWithGestureRecognizer:
+        (UIGestureRecognizer*)otherGestureRecognizer {
+  return YES;
+}
 
 - (void)panEvent:(UIPanGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
   CGPoint translation = [recognizer translationInView:self.view];
@@ -1618,8 +1621,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseBegin;
-  }
-  else if (recognizer.state == UIGestureRecognizerStateChanged) {
+  } else if (recognizer.state == UIGestureRecognizerStateChanged) {
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseUpdate;
     pointer_data.pan_x = translation.x;
     pointer_data.pan_y = translation.y;
@@ -1627,8 +1629,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     pointer_data.pan_delta_y = translation.y - _mouseState.last_translation.y;
     pointer_data.zoom_scale = 1;
     _mouseState.last_translation = translation;
-  }
-  else {
+  } else {
     _mouseState.last_translation = CGPointZero;
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseEnd;
   }
@@ -1646,13 +1647,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseBegin;
-  }
-  else if (recognizer.state == UIGestureRecognizerStateChanged) {
+  } else if (recognizer.state == UIGestureRecognizerStateChanged) {
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseUpdate;
     pointer_data.zoom_scale = recognizer.scale;
     pointer_data.rotate_radians = _rotationGestureRecognizer.get().rotation;
-  }
-  else {
+  } else {
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseEnd;
   }
 

@@ -53,18 +53,9 @@ struct alignas(8) PointerData {
   };
 
   // Must match the PointerSignalKind enum in pointer.dart.
-  enum class SignalKind : int64_t {
-    kNone,
-    kScroll,
-	  kPlatformGesture
-  };
+  enum class SignalKind : int64_t { kNone, kScroll, kPlatformGesture };
 
-  enum class PlatformGesturePhase : int64_t {
-    kNone,
-    kBegin,
-    kUpdate,
-    kEnd
-  };
+  enum class PlatformGesturePhase : int64_t { kNone, kBegin, kUpdate, kEnd };
 
   int64_t embedder_id;
   int64_t time_stamp;

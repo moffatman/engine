@@ -250,7 +250,6 @@ void PointerDataPacketConverter::ConvertPointerData(
         break;
       }
       case PointerData::SignalKind::kPlatformGesture: {
-
         // Makes sure we have an existing pointer
         auto iter = states_.find(pointer_data.device);
         PointerState state;
@@ -266,7 +265,9 @@ void PointerDataPacketConverter::ConvertPointerData(
           state = iter->second;
         }
         // Split into ~1 px chunks
-        int max_step = std::max(1, (int)std::ceil(std::fmax(std::abs(pointer_data.pan_delta_x), std::abs(pointer_data.pan_delta_y))));
+        int max_step = std::max(
+            1, (int)std::ceil(std::fmax(std::abs(pointer_data.pan_delta_x),
+                                        std::abs(pointer_data.pan_delta_y))));
         double pan_step_x = pointer_data.pan_delta_x / max_step;
         double pan_step_y = pointer_data.pan_delta_y / max_step;
         double pan_x = pointer_data.pan_x - pointer_data.pan_delta_x;
@@ -279,7 +280,9 @@ void PointerDataPacketConverter::ConvertPointerData(
           synthesized_event.pan_delta_y = pan_step_y;
           synthesized_event.pan_x = pan_x;
           synthesized_event.pan_y = pan_y;
-          synthesized_event.synthesized = i != 0; // Mark the first as "real" to allow velocity trackers to work
+          synthesized_event.synthesized =
+              i !=
+              0;  // Mark the first as "real" to allow velocity trackers to work
           converted_pointers.push_back(synthesized_event);
         }
         break;

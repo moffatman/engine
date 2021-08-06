@@ -1560,7 +1560,9 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
         pointer_data.buttons = SAFE_ACCESS(current, buttons, 0);
       }
     }
-    pointer_data.gesture_phase = SAFE_ACCESS(current, gesture_phase, flutter::PointerData::PlatformGesturePhase::kNone);
+    pointer_data.gesture_phase =
+        SAFE_ACCESS(current, gesture_phase,
+                    flutter::PointerData::PlatformGesturePhase::kNone);
     pointer_data.pan_x = SAFE_ACCESS(current, pan_x, 0.0);
     pointer_data.pan_y = SAFE_ACCESS(current, pan_y, 0.0);
     pointer_data.pan_delta_x = SAFE_ACCESS(current, pan_delta_x, 0.0);
