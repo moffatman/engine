@@ -1614,8 +1614,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   translation.x *= scale;
   translation.y *= scale;
 
-  auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
   pointer_data.signal_kind = flutter::PointerData::SignalKind::kPlatformGesture;
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
@@ -1634,7 +1632,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     pointer_data.gesture_phase = kFlutterPointerPlatformGesturePhaseEnd;
   }
 
+  int packet_size = 1;
+  if (pointer_data.gesture_phase == kFlutterPointerPlatformGesturePhaseEnd) {
+    packet_size = 2;
+  }
+  auto packet = std::make_unique<flutter::PointerDataPacket>(packet_size);
   packet->SetPointerData(/*index=*/0, pointer_data);
+  if (pointer_data.gesture_phase == kFlutterPointerPlatformGesturePhaseEnd) {
+    flutter::PointerData remove_pointer_data = [self generatePointerDataForMouse];
+    remove_pointer_data.change = flutter::PointerData::Change::kRemove;
+    packet->SetPointerData(/*index=*/1, remove_pointer_data);
+  }
 
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
 }
