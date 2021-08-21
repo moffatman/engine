@@ -208,6 +208,31 @@ void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind,
   SendPointerLeave(GetOrCreatePointerState(device_kind, device_id));
 }
 
+void FlutterWindowsView::OnPlatformGestureBegin(double x, double y) {
+  // FML_LOG(ERROR) << "OnPlatformGestureBegin " << x << " " << y;
+  SendPlatformGestureBegin(x, y);
+}
+
+void FlutterWindowsView::OnPlatformGestureUpdate(double x,
+                                                 double y,
+                                                 double pan_x,
+                                                 double pan_y,
+                                                 double pan_delta_x,
+                                                 double pan_delta_y,
+                                                 double rotation,
+                                                 double scale) {
+  // FML_LOG(ERROR) << "OnPlatformGestureUpdate " << x << " " << y << " " <<
+  // pan_x << " " << pan_y << " " << pan_delta_x << " " << pan_delta_y << " " <<
+  // rotation << " " << scale;
+  SendPlatformGestureUpdate(x, y, pan_x, pan_y, pan_delta_x, pan_delta_y,
+                            rotation, scale);
+}
+
+void FlutterWindowsView::OnPlatformGestureEnd(double x, double y) {
+  // FML_LOG(ERROR) << "OnPlatformGestureEnd " << x << " " << y;
+  SendPlatformGestureEnd(x, y);
+}
+
 void FlutterWindowsView::OnText(const std::u16string& text) {
   SendText(text);
 }
@@ -351,6 +376,46 @@ void FlutterWindowsView::SendPointerLeave(PointerState* state) {
   FlutterPointerEvent event = {};
   event.phase = FlutterPointerPhase::kRemove;
   SendPointerEventWithData(event, state);
+}
+
+void FlutterWindowsView::SendPlatformGestureBegin(double x, double y) {
+  FlutterPointerEvent event = {};
+  event.x = x;
+  event.y = y;
+  event.signal_kind = kFlutterPointerSignalKindPlatformGesture;
+  event.gesture_phase = kFlutterPointerPlatformGesturePhaseBegin;
+  SendPointerEventWithData(event);
+}
+
+void FlutterWindowsView::SendPlatformGestureUpdate(double x,
+                                                   double y,
+                                                   double pan_x,
+                                                   double pan_y,
+                                                   double pan_delta_x,
+                                                   double pan_delta_y,
+                                                   double rotation,
+                                                   double scale) {
+  FlutterPointerEvent event = {};
+  event.x = x;
+  event.y = y;
+  event.pan_x = pan_x;
+  event.pan_y = pan_y;
+  event.pan_delta_x = pan_delta_x;
+  event.pan_delta_y = pan_delta_y;
+  event.rotate_radians = rotation;
+  event.zoom_scale = scale;
+  event.signal_kind = kFlutterPointerSignalKindPlatformGesture;
+  event.gesture_phase = kFlutterPointerPlatformGesturePhaseUpdate;
+  SendPointerEventWithData(event);
+}
+
+void FlutterWindowsView::SendPlatformGestureEnd(double x, double y) {
+  FlutterPointerEvent event = {};
+  event.x = x;
+  event.y = y;
+  event.signal_kind = kFlutterPointerSignalKindPlatformGesture;
+  event.gesture_phase = kFlutterPointerPlatformGesturePhaseEnd;
+  SendPointerEventWithData(event);
 }
 
 void FlutterWindowsView::SendText(const std::u16string& text) {

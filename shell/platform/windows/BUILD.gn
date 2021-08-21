@@ -105,6 +105,8 @@ source_set("flutter_windows_source") {
     ]
   } else {
     sources += [
+      "direct_manipulation.cc",
+      "direct_manipulation.h",
       "dpi_utils_win32.cc",
       "dpi_utils_win32.h",
       "flutter_window_win32.cc",
@@ -143,19 +145,16 @@ source_set("flutter_windows_source") {
 
   public_configs = [ ":relative_angle_headers" ]
 
-  if (target_os == "winuwp") {
-    defines = [
-      "_SILENCE_CLANG_COROUTINE_MESSAGE",
-      "FLUTTER_ENGINE_NO_PROTOTYPES",
-    ]
-  } else {
-    defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
-  }
+  defines = [
+    "_SILENCE_CLANG_COROUTINE_MESSAGE",
+    "FLUTTER_ENGINE_NO_PROTOTYPES",
+  ]
 
   public_deps = [ ":string_conversion" ]
 
   deps = [
     ":flutter_windows_headers",
+    "//flutter/fml:fml",
     "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
@@ -266,6 +265,8 @@ executable("flutter_windows_unittests") {
   }
 
   public_configs = [ "//flutter:config" ]
+
+  defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]
 
   deps = [
     ":flutter_windows_fixtures",

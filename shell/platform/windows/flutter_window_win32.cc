@@ -75,6 +75,7 @@ FlutterWindowWin32::~FlutterWindowWin32() {}
 
 void FlutterWindowWin32::SetView(WindowBindingHandlerDelegate* window) {
   binding_handler_delegate_ = window;
+  direct_manipulation_owner_->SetBindingHandlerDelegate(window);
 }
 
 WindowsRenderTarget FlutterWindowWin32::GetRenderTarget() {
