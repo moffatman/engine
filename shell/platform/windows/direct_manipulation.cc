@@ -31,8 +31,8 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
         POINT point;
         GetCursorPos(&point);
         ScreenToClient(window_->GetWindowHandle(), &point);
-        owner_->binding_handler_delegate->OnPlatformGestureBegin(point.x,
-                                                                 point.y);
+        owner_->binding_handler_delegate->OnPointerGestureStart(point.x,
+                                                                point.y);
       }
     }
   } else if (previous == DIRECTMANIPULATION_RUNNING) {
@@ -43,14 +43,11 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
         POINT point;
         GetCursorPos(&point);
         ScreenToClient(window_->GetWindowHandle(), &point);
-        owner_->binding_handler_delegate->OnPlatformGestureEnd(point.x,
-                                                               point.y);
+        owner_->binding_handler_delegate->OnPointerGestureEnd(point.x, point.y);
       }
       // Need to reset the content transform
       // Use resetting_ flag to prevent sending reset also to the framework
       resetting_ = true;
-      last_pan_x_ = 0;
-      last_pan_y_ = 0;
       RECT rect;
       viewport->GetViewportRect(&rect);
       HRESULT hr = viewport->ZoomToRect(rect.left, rect.top, rect.right,
@@ -88,12 +85,9 @@ HRESULT DirectManipulationEventHandler::OnContentUpdated(
       POINT point;
       GetCursorPos(&point);
       ScreenToClient(window_->GetWindowHandle(), &point);
-      owner_->binding_handler_delegate->OnPlatformGestureUpdate(
-          point.x, point.y, pan_x, pan_y, pan_x - last_pan_x_,
-          pan_y - last_pan_y_, 0, scale);
+      owner_->binding_handler_delegate->OnPointerGestureUpdate(
+          point.x, point.y, pan_x, pan_y, scale, 0);
     }
-    last_pan_x_ = pan_x;
-    last_pan_y_ = pan_y;
   }
   return S_OK;
 }

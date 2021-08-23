@@ -10,7 +10,7 @@
 namespace flutter {
 
 // If this value changes, update the pointer data unpacking code in hooks.dart.
-static constexpr int kPointerDataFieldCount = 36;
+static constexpr int kPointerDataFieldCount = 35;
 static constexpr int kBytesPerField = sizeof(int64_t);
 // Must match the button constants in events.dart.
 enum PointerButtonMouse : int64_t {
@@ -42,6 +42,9 @@ struct alignas(8) PointerData {
     kDown,
     kMove,
     kUp,
+    kGestureDown,
+    kGestureMove,
+    kGestureUp,
   };
 
   // Must match the PointerDeviceKind enum in pointer.dart.
@@ -53,9 +56,7 @@ struct alignas(8) PointerData {
   };
 
   // Must match the PointerSignalKind enum in pointer.dart.
-  enum class SignalKind : int64_t { kNone, kScroll, kPlatformGesture };
-
-  enum class PlatformGesturePhase : int64_t { kNone, kBegin, kUpdate, kEnd };
+  enum class SignalKind : int64_t { kNone, kScroll };
 
   int64_t embedder_id;
   int64_t time_stamp;
@@ -86,13 +87,12 @@ struct alignas(8) PointerData {
   int64_t platformData;
   double scroll_delta_x;
   double scroll_delta_y;
-  int64_t gesture_phase;
   double pan_x;
   double pan_y;
   double pan_delta_x;
   double pan_delta_y;
-  double rotate_radians;
-  double zoom_scale;
+  double scale;
+  double angle;
 
   void Clear();
 };

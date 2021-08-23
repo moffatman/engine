@@ -71,8 +71,6 @@ class DirectManipulationEventHandler
  private:
   WindowWin32* window_;
   DirectManipulationOwner* owner_;
-  float last_pan_x_ = 0;
-  float last_pan_y_ = 0;
   bool resetting_ = false;
 };
 

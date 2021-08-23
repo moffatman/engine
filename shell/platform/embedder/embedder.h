@@ -616,6 +616,12 @@ typedef enum {
   kRemove,
   /// The pointer moved while up.
   kHover,
+  /// A gesture started on this pointer
+  kGestureDown,
+  /// The gesture updated
+  kGestureMove,
+  /// The gesture ended
+  kGestureUp,
 } FlutterPointerPhase;
 
 /// The device type that created a pointer event.
@@ -641,15 +647,7 @@ typedef enum {
 typedef enum {
   kFlutterPointerSignalKindNone,
   kFlutterPointerSignalKindScroll,
-  kFlutterPointerSignalKindPlatformGesture,
 } FlutterPointerSignalKind;
-
-typedef enum {
-  kFlutterPointerPlatformGesturePhaseNone,
-  kFlutterPointerPlatformGesturePhaseBegin,
-  kFlutterPointerPlatformGesturePhaseUpdate,
-  kFlutterPointerPlatformGesturePhaseEnd,
-} FlutterPointerPlatformGesturePhase;
 
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterPointerEvent).
@@ -679,13 +677,12 @@ typedef struct {
   FlutterPointerDeviceKind device_kind;
   /// The buttons currently pressed, if any.
   int64_t buttons;
-  FlutterPointerPlatformGesturePhase gesture_phase;
   double pan_x;
   double pan_y;
   double pan_delta_x;
   double pan_delta_y;
-  double rotate_radians;
-  double zoom_scale;
+  double scale;
+  double angle;
 } FlutterPointerEvent;
 
 typedef enum {

@@ -118,20 +118,18 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                       int32_t device_id = 0) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPlatformGestureBegin(double x, double y) override;
+  virtual void OnPointerGestureStart(double x, double y) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPlatformGestureUpdate(double x,
-                                       double y,
-                                       double pan_x,
-                                       double pan_y,
-                                       double pan_delta_x,
-                                       double pan_delta_y,
-                                       double rotation,
-                                       double scale) override;
+  virtual void OnPointerGestureUpdate(double x,
+                                      double y,
+                                      double pan_x,
+                                      double pan_y,
+                                      double scale,
+                                      double angle) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPlatformGestureEnd(double x, double y) override;
+  virtual void OnPointerGestureEnd(double x, double y) override;
 
   // |WindowBindingHandlerDelegate|
   void OnText(const std::u16string&) override;
@@ -240,18 +238,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // event is called.
   void SendPointerLeave(PointerState* state);
 
-  void SendPlatformGestureBegin(double x, double y);
+  void SendPointerGestureBegin(double x, double y);
 
-  void SendPlatformGestureUpdate(double x,
-                                 double y,
-                                 double pan_x,
-                                 double pan_y,
-                                 double pan_delta_x,
-                                 double pan_delta_y,
-                                 double rotation,
-                                 double scale);
+  void SendPointerGestureUpdate(double x,
+                                double y,
+                                double pan_x,
+                                double pan_y,
+                                double scale,
+                                double angle);
 
-  void SendPlatformGestureEnd(double x, double y);
+  void SendPointerGestureEnd(double x, double y);
 
   // Reports a keyboard character to Flutter engine.
   void SendText(const std::u16string&);

@@ -36,6 +36,15 @@ enum PointerChange {
 
   /// The pointer has stopped making contact with the device.
   up,
+
+  /// A platform gesture has started
+  gestureDown,
+
+  /// A platform gesture has updated
+  gestureMove,
+
+  /// A platform gesture has ended
+  gestureUp,
 }
 
 /// The kind of pointer device.
@@ -64,18 +73,8 @@ enum PointerSignalKind {
   /// A pointer-generated scroll (e.g., mouse wheel or trackpad scroll).
   scroll,
 
-  /// A pointer-generated gesture (e.g. trackpad zoom, pan)
-  platformGesture,
-
   /// An unknown pointer signal kind.
   unknown
-}
-
-enum PointerPlatformGesturePhase {
-	none,
-	begin,
-	update,
-	end
 }
 
 /// Information about the state of a pointer.
@@ -111,13 +110,12 @@ class PointerData {
     this.platformData = 0,
     this.scrollDeltaX = 0.0,
     this.scrollDeltaY = 0.0,
-    this.gesturePhase = PointerPlatformGesturePhase.none,
     this.panX = 0.0,
     this.panY = 0.0,
     this.panDeltaX = 0.0,
     this.panDeltaY = 0.0,
-    this.zoomScale = 0.0,
-    this.rotateRadians = 0.0,
+    this.scale = 0.0,
+    this.angle = 0.0,
   });
 
   /// Unique identifier that ties the [PointerEvent] to embedder event created it.
@@ -282,13 +280,12 @@ class PointerData {
   /// The amount to scroll in the y direction, in physical pixels.
   final double scrollDeltaY;
 
-  final PointerPlatformGesturePhase gesturePhase;
   final double panX;
   final double panY;
   final double panDeltaX;
   final double panDeltaY;
-  final double rotateRadians;
-  final double zoomScale;
+  final double scale;
+  final double angle;
 
   @override
   String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
@@ -324,10 +321,10 @@ class PointerData {
              'platformData: $platformData, '
              'scrollDeltaX: $scrollDeltaX, '
              'scrollDeltaY: $scrollDeltaY, '
-			 'panX: $panX, '
-			 'panY: $panY, '
-			 'rotateRadians: $rotateRadians, '
-			 'zoomScale: $zoomScale'
+             'panX: $panX, '
+             'panY: $panY, '
+             'angle: $angle, '
+             'scale: $scale'
            ')';
   }
 }

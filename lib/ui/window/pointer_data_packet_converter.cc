@@ -208,6 +208,110 @@ void PointerDataPacketConverter::ConvertPointerData(
         converted_pointers.push_back(pointer_data);
         break;
       }
+      case PointerData::Change::kGestureDown: {
+        // Makes sure we have an existing pointer
+        auto iter = states_.find(pointer_data.device);
+        PointerState state;
+        if (iter == states_.end()) {
+          // Synthesizes add event if the pointer is not previously added.
+          PointerData synthesized_add_event = pointer_data;
+          synthesized_add_event.change = PointerData::Change::kAdd;
+          synthesized_add_event.synthesized = 1;
+          synthesized_add_event.buttons = 0;
+          state = EnsurePointerState(synthesized_add_event);
+          converted_pointers.push_back(synthesized_add_event);
+        } else {
+          state = iter->second;
+        }
+        FML_DCHECK(!state.is_down);
+        FML_DCHECK(!state.is_gesture_down);
+        if (LocationNeedsUpdate(pointer_data, state)) {
+          // Synthesizes a hover event if the location does not match.
+          PointerData synthesized_hover_event = pointer_data;
+          synthesized_hover_event.change = PointerData::Change::kHover;
+          synthesized_hover_event.synthesized = 1;
+          synthesized_hover_event.buttons = 0;
+
+          UpdateDeltaAndState(synthesized_hover_event, state);
+          converted_pointers.push_back(synthesized_hover_event);
+        }
+
+        UpdatePointerIdentifier(pointer_data, state, true);
+        state.is_gesture_down = true;
+        state.pan_x = 0;
+        state.pan_y = 0;
+        state.scale = 1;
+        state.angle = 0;
+        states_[pointer_data.device] = state;
+        converted_pointers.push_back(pointer_data);
+        break;
+      }
+      case PointerData::Change::kGestureMove: {
+        // Makes sure we have an existing pointer in gesture_down state
+        auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end());
+        PointerState state = iter->second;
+        FML_DCHECK(!state.is_down);
+        FML_DCHECK(state.is_gesture_down);
+
+        UpdatePointerIdentifier(pointer_data, state, false);
+        UpdateDeltaAndState(pointer_data, state);
+
+        /*
+        // Split into ~1 px chunks to fix competition between pan and scale
+        int max_step = std::max(
+            1, (int)std::ceil(std::fmax(std::abs(pointer_data.pan_delta_x),
+                                        std::abs(pointer_data.pan_delta_y))));
+        double pan_step_x = pointer_data.pan_delta_x / max_step;
+        double pan_step_y = pointer_data.pan_delta_y / max_step;
+        double pan_x = pointer_data.pan_x - pointer_data.pan_delta_x;
+        double pan_y = pointer_data.pan_y - pointer_data.pan_delta_y;
+        for (int i = 0; i < max_step; i++) {
+          pan_x += pan_step_x;
+          pan_y += pan_step_y;
+          PointerData synthesized_event = pointer_data;
+          synthesized_event.pan_delta_x = pan_step_x;
+          synthesized_event.pan_delta_y = pan_step_y;
+          synthesized_event.pan_x = pan_x;
+          synthesized_event.pan_y = pan_y;
+          synthesized_event.synthesized =
+              i !=
+              0;  // Mark the first as "real" to allow velocity trackers to work
+          converted_pointers.push_back(synthesized_event);
+        }*/
+        converted_pointers.push_back(pointer_data);
+        break;
+      }
+      case PointerData::Change::kGestureUp: {
+        // Makes sure we have an existing pointer in gesture_down state
+        auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end());
+        PointerState state = iter->second;
+        FML_DCHECK(state.is_gesture_down);
+
+        UpdatePointerIdentifier(pointer_data, state, false);
+
+        if (LocationNeedsUpdate(pointer_data, state)) {
+          // Synthesizes a gestureMove event if the location does not match.
+          PointerData synthesized_move_event = pointer_data;
+          synthesized_move_event.change = PointerData::Change::kGestureMove;
+          synthesized_move_event.pan_x = state.pan_x;
+          synthesized_move_event.pan_y = state.pan_y;
+          synthesized_move_event.pan_delta_x = 0;
+          synthesized_move_event.pan_delta_y = 0;
+          synthesized_move_event.scale = state.scale;
+          synthesized_move_event.angle = state.angle;
+          synthesized_move_event.synthesized = 1;
+
+          UpdateDeltaAndState(synthesized_move_event, state);
+          converted_pointers.push_back(synthesized_move_event);
+        }
+
+        state.is_gesture_down = false;
+        states_[pointer_data.device] = state;
+        converted_pointers.push_back(pointer_data);
+        break;
+      }
       default: {
         converted_pointers.push_back(pointer_data);
         break;
@@ -249,44 +353,6 @@ void PointerDataPacketConverter::ConvertPointerData(
         converted_pointers.push_back(pointer_data);
         break;
       }
-      case PointerData::SignalKind::kPlatformGesture: {
-        // Makes sure we have an existing pointer
-        auto iter = states_.find(pointer_data.device);
-        PointerState state;
-        if (iter == states_.end()) {
-          // Synthesizes add event if the pointer is not previously added.
-          PointerData synthesized_add_event = pointer_data;
-          synthesized_add_event.change = PointerData::Change::kAdd;
-          synthesized_add_event.synthesized = 1;
-          synthesized_add_event.buttons = 0;
-          state = EnsurePointerState(synthesized_add_event);
-          converted_pointers.push_back(synthesized_add_event);
-        } else {
-          state = iter->second;
-        }
-        // Split into ~1 px chunks
-        int max_step = std::max(
-            1, (int)std::ceil(std::fmax(std::abs(pointer_data.pan_delta_x),
-                                        std::abs(pointer_data.pan_delta_y))));
-        double pan_step_x = pointer_data.pan_delta_x / max_step;
-        double pan_step_y = pointer_data.pan_delta_y / max_step;
-        double pan_x = pointer_data.pan_x - pointer_data.pan_delta_x;
-        double pan_y = pointer_data.pan_y - pointer_data.pan_delta_y;
-        for (int i = 0; i < max_step; i++) {
-          pan_x += pan_step_x;
-          pan_y += pan_step_y;
-          PointerData synthesized_event = pointer_data;
-          synthesized_event.pan_delta_x = pan_step_x;
-          synthesized_event.pan_delta_y = pan_step_y;
-          synthesized_event.pan_x = pan_x;
-          synthesized_event.pan_y = pan_y;
-          synthesized_event.synthesized =
-              i !=
-              0;  // Mark the first as "real" to allow velocity trackers to work
-          converted_pointers.push_back(synthesized_event);
-        }
-        break;
-      }
       default: {
         // Ignores unknown signal kind.
         break;
@@ -300,6 +366,7 @@ PointerState PointerDataPacketConverter::EnsurePointerState(
   PointerState state;
   state.pointer_identifier = 0;
   state.is_down = false;
+  state.is_gesture_down = false;
   state.physical_x = pointer_data.physical_x;
   state.physical_y = pointer_data.physical_y;
   state.pan_x = pointer_data.pan_x;
@@ -318,6 +385,8 @@ void PointerDataPacketConverter::UpdateDeltaAndState(PointerData& pointer_data,
   state.physical_y = pointer_data.physical_y;
   state.pan_x = pointer_data.pan_x;
   state.pan_y = pointer_data.pan_y;
+  state.scale = pointer_data.scale;
+  state.angle = pointer_data.angle;
   states_[pointer_data.device] = state;
 }
 

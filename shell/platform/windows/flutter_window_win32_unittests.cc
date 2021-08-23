@@ -208,11 +208,10 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
                     int32_t,
                     FlutterPointerMouseButtons));
   MOCK_METHOD2(OnPointerLeave, void(FlutterPointerDeviceKind, int32_t));
-  MOCK_METHOD2(OnPlatformGestureBegin, void(double, double));
-  MOCK_METHOD8(
-      OnPlatformGestureUpdate,
-      void(double, double, double, double, double, double, double, double));
-  MOCK_METHOD2(OnPlatformGestureEnd, void(double, double));
+  MOCK_METHOD2(OnPointerGestureStart, void(double, double));
+  MOCK_METHOD6(OnPointerGestureUpdate,
+               void(double, double, double, double, double, double));
+  MOCK_METHOD2(OnPointerGestureEnd, void(double, double));
   MOCK_METHOD1(OnText, void(const std::u16string&));
   MOCK_METHOD6(OnKey, bool(int, int, int, char32_t, bool, bool));
   MOCK_METHOD0(OnComposeBegin, void());

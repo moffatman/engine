@@ -1446,6 +1446,12 @@ inline flutter::PointerData::Change ToPointerDataChange(
       return flutter::PointerData::Change::kRemove;
     case kHover:
       return flutter::PointerData::Change::kHover;
+    case kGestureDown:
+      return flutter::PointerData::Change::kGestureDown;
+    case kGestureMove:
+      return flutter::PointerData::Change::kGestureMove;
+    case kGestureUp:
+      return flutter::PointerData::Change::kGestureUp;
   }
   return flutter::PointerData::Change::kCancel;
 }
@@ -1474,8 +1480,6 @@ inline flutter::PointerData::SignalKind ToPointerDataSignalKind(
       return flutter::PointerData::SignalKind::kNone;
     case kFlutterPointerSignalKindScroll:
       return flutter::PointerData::SignalKind::kScroll;
-    case kFlutterPointerSignalKindPlatformGesture:
-      return flutter::PointerData::SignalKind::kPlatformGesture;
   }
   return flutter::PointerData::SignalKind::kNone;
 }
@@ -1495,6 +1499,9 @@ inline int64_t PointerDataButtonsForLegacyEvent(
     case flutter::PointerData::Change::kRemove:
     case flutter::PointerData::Change::kHover:
     case flutter::PointerData::Change::kUp:
+    case flutter::PointerData::Change::kGestureDown:
+    case flutter::PointerData::Change::kGestureMove:
+    case flutter::PointerData::Change::kGestureUp:
       return 0;
   }
   return 0;
@@ -1560,15 +1567,12 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
         pointer_data.buttons = SAFE_ACCESS(current, buttons, 0);
       }
     }
-    pointer_data.gesture_phase =
-        SAFE_ACCESS(current, gesture_phase,
-                    flutter::PointerData::PlatformGesturePhase::kNone);
     pointer_data.pan_x = SAFE_ACCESS(current, pan_x, 0.0);
     pointer_data.pan_y = SAFE_ACCESS(current, pan_y, 0.0);
     pointer_data.pan_delta_x = SAFE_ACCESS(current, pan_delta_x, 0.0);
     pointer_data.pan_delta_y = SAFE_ACCESS(current, pan_delta_y, 0.0);
-    pointer_data.rotate_radians = SAFE_ACCESS(current, rotate_radians, 0.0);
-    pointer_data.zoom_scale = SAFE_ACCESS(current, zoom_scale, 0.0);
+    pointer_data.scale = SAFE_ACCESS(current, scale, 0.0);
+    pointer_data.angle = SAFE_ACCESS(current, angle, 0.0);
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);

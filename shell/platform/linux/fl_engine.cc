@@ -639,19 +639,16 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
-void fl_engine_send_platform_gesture_event(
-    FlEngine* self,
-    int64_t device,
-    size_t timestamp,
-    double x,
-    double y,
-    FlutterPointerPlatformGesturePhase gesture_phase,
-    double pan_x,
-    double pan_y,
-    double pan_delta_x,
-    double pan_delta_y,
-    double rotate_radians,
-    double zoom_scale) {
+void fl_engine_send_pointer_gesture_event(FlEngine* self,
+                                          int64_t device,
+                                          size_t timestamp,
+                                          double x,
+                                          double y,
+                                          FlutterPointerPhase phase,
+                                          double pan_x,
+                                          double pan_y,
+                                          double angle,
+                                          double scale) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
   if (self->engine == nullptr) {
@@ -663,16 +660,17 @@ void fl_engine_send_platform_gesture_event(
   fl_event.timestamp = timestamp;
   fl_event.x = x;
   fl_event.y = y;
-  fl_event.signal_kind = kFlutterPointerSignalKindPlatformGesture;
-  fl_event.gesture_phase = gesture_phase;
+  fl_event.phase = phase;
   fl_event.pan_x = pan_x;
   fl_event.pan_y = pan_y;
-  fl_event.pan_delta_x = pan_delta_x;
-  fl_event.pan_delta_y = pan_delta_y;
-  fl_event.rotate_radians = rotate_radians;
-  fl_event.zoom_scale = zoom_scale;
+  fl_event.pan_delta_x =
+      0;  // Delta will be generated in pointer_data_packet_converter.cc.
+  fl_event.pan_delta_y =
+      0;  // Delta will be generated in pointer_data_packet_converter.cc.
+  fl_event.scale = scale;
+  fl_event.angle = angle;
   fl_event.device = device;
-  fl_event.device_kind = kFlutterPointerDeviceKindMouse;
+  fl_event.device_kind = kFlutterPointerDeviceKindTouch;
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
