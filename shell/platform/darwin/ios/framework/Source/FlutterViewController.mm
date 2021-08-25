@@ -925,6 +925,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       case flutter::PointerData::Change::kRemove:
         // We don't use kAdd/kRemove.
         break;
+      case flutter::PointerData::Change::kGestureDown:
+      case flutter::PointerData::Change::kGestureMove:
+      case flutter::PointerData::Change::kGestureUp:
+        // We don't send gesture events here
+        break;
     }
 
     // pressure_min is always 0.0
@@ -1615,7 +1620,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   translation.y *= scale;
 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.device = reinterpret_cast<int64_t>(recognizer);
+  pointer_data.device = reinterpret_cast<int64_t>(_pointerInteraction.get());
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.change = flutter::PointerData::Change::kGestureDown;
@@ -1638,11 +1643,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
   auto packet = std::make_unique<flutter::PointerDataPacket>(packet_size);
   packet->SetPointerData(/*index=*/0, pointer_data);
-  if (pointer_data.change == flutter::PointerData::Change::kGestureUp) {
-    flutter::PointerData remove_pointer_data = [self generatePointerDataForMouse];
-    remove_pointer_data.change = flutter::PointerData::Change::kRemove;
-    packet->SetPointerData(/*index=*/1, remove_pointer_data);
-  }
 
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
 }
@@ -1651,7 +1651,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.device = reinterpret_cast<int64_t>(recognizer);
+  pointer_data.device = reinterpret_cast<int64_t>(_pointerInteraction.get());
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.change = flutter::PointerData::Change::kGestureDown;

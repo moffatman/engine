@@ -323,8 +323,10 @@ class PointerData {
              'scrollDeltaY: $scrollDeltaY, '
              'panX: $panX, '
              'panY: $panY, '
-             'angle: $angle, '
-             'scale: $scale'
+             'panDeltaX: $panDeltaX, '
+             'panDeltaY: $panDeltaY, '
+             'scale: $scale, '
+             'angle: $angle'
            ')';
   }
 }

@@ -647,8 +647,8 @@ void fl_engine_send_pointer_gesture_event(FlEngine* self,
                                           FlutterPointerPhase phase,
                                           double pan_x,
                                           double pan_y,
-                                          double angle,
-                                          double scale) {
+                                          double scale,
+                                          double angle) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
   if (self->engine == nullptr) {

@@ -347,8 +347,8 @@ class PlatformDispatcher {
         panY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
         panDeltaX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
         panDeltaY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
-        angle: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
         scale: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        angle: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       ));
       assert(offset == (i + 1) * _kPointerDataFieldCount);
     }
