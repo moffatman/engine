@@ -889,7 +889,7 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)swipeWithEvent:(NSEvent*)event {
   // FML_LOG(ERROR) << "swipe, phase = " << event.phase << " momentumPhase = " <<
-  // event.momentumPhase<< ", deltaX = " << event.deltaX << ", deltaY = " << event.deltaY <<
+  // event.momentumPhase << ", deltaX = " << event.deltaX << ", deltaY = " << event.deltaY <<
   // ", scrollingDeltaX = " << event.scrollingDeltaX << ", scrollingDeltaY = " <<
   // event.scrollingDeltaY;
 }
