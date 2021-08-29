@@ -238,16 +238,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // event is called.
   void SendPointerLeave(PointerState* state);
 
-  void SendPointerGestureBegin(double x, double y);
+  void SendPointerGestureDown(double x, double y);
 
-  void SendPointerGestureUpdate(double x,
-                                double y,
-                                double pan_x,
-                                double pan_y,
-                                double scale,
-                                double angle);
+  void SendPointerGestureMove(double x,
+                              double y,
+                              double pan_x,
+                              double pan_y,
+                              double scale,
+                              double angle);
 
-  void SendPointerGestureEnd(double x, double y);
+  void SendPointerGestureUp(double x, double y);
 
   // Reports a keyboard character to Flutter engine.
   void SendText(const std::u16string&);

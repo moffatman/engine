@@ -209,8 +209,7 @@ void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind,
 }
 
 void FlutterWindowsView::OnPointerGestureStart(double x, double y) {
-  // FML_LOG(ERROR) << "OnPointerGestureStart " << x << " " << y;
-  SendPointerGestureBegin(x, y);
+  SendPointerGestureDown(x, y);
 }
 
 void FlutterWindowsView::OnPointerGestureUpdate(double x,
@@ -219,14 +218,11 @@ void FlutterWindowsView::OnPointerGestureUpdate(double x,
                                                 double pan_y,
                                                 double scale,
                                                 double angle) {
-  // FML_LOG(ERROR) << "OnPointerGestureUpdate " << x << " " << y << " " <<
-  // pan_x << " " << pan_y << " " << scale << " " << angle;
-  SendPointerGestureUpdate(x, y, pan_x, pan_y, scale, angle);
+  SendPointerGestureMove(x, y, pan_x, pan_y, scale, angle);
 }
 
 void FlutterWindowsView::OnPointerGestureEnd(double x, double y) {
-  // FML_LOG(ERROR) << "OnPointerGestureEnd " << x << " " << y;
-  SendPointerGestureEnd(x, y);
+  SendPointerGestureUp(x, y);
 }
 
 void FlutterWindowsView::OnText(const std::u16string& text) {
@@ -374,21 +370,22 @@ void FlutterWindowsView::SendPointerLeave(PointerState* state) {
   SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerGestureBegin(double x, double y) {
+void FlutterWindowsView::SendPointerGestureDown(double x, double y) {
+  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, 0);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
   event.phase = FlutterPointerPhase::kGestureDown;
-  event.device_kind = flutter::PointerData::DeviceKind::kTouch;
-  SendPointerEventWithData(event);
+  SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerGestureUpdate(double x,
-                                                  double y,
-                                                  double pan_x,
-                                                  double pan_y,
-                                                  double scale,
-                                                  double angle) {
+void FlutterWindowsView::SendPointerGestureMove(double x,
+                                                double y,
+                                                double pan_x,
+                                                double pan_y,
+                                                double scale,
+                                                double angle) {
+  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, 0);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
@@ -397,17 +394,16 @@ void FlutterWindowsView::SendPointerGestureUpdate(double x,
   event.scale = scale;
   event.angle = angle;
   event.phase = FlutterPointerPhase::kGestureMove;
-  event.device_kind = flutter::PointerData::DeviceKind::kTouch;
-  SendPointerEventWithData(event);
+  SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerGestureEnd(double x, double y) {
+void FlutterWindowsView::SendPointerGestureUp(double x, double y) {
+  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, 0);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
   event.phase = FlutterPointerPhase::kGestureUp;
-  event.device_kind = flutter::PointerData::DeviceKind::kTouch;
-  SendPointerEventWithData(event);
+  SendPointerEventWithData(event, state);
 }
 
 void FlutterWindowsView::SendText(const std::u16string& text) {
