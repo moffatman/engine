@@ -559,12 +559,6 @@ static gboolean event_box_scroll_event(GtkWidget* widget,
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
     if (event->is_stop) {
-      view->pan_x += scroll_delta_x;
-      view->pan_y += scroll_delta_y;
-      fl_engine_send_pointer_gesture_event(
-          view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-          event->x * scale_factor, event->y * scale_factor, kGestureMove,
-          view->pan_x, view->pan_y, 1, 0);
       fl_engine_send_pointer_gesture_event(
           view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
           event->x * scale_factor, event->y * scale_factor, kGestureUp,
