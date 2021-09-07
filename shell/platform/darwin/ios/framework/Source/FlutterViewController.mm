@@ -1620,7 +1620,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   translation.y *= scale;
 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.device = reinterpret_cast<int64_t>(_pointerInteraction.get());
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.change = flutter::PointerData::Change::kGestureDown;
@@ -1637,11 +1636,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     pointer_data.change = flutter::PointerData::Change::kGestureUp;
   }
 
-  int packet_size = 1;
-  if (pointer_data.change == flutter::PointerData::Change::kGestureUp) {
-    packet_size = 2;
-  }
-  auto packet = std::make_unique<flutter::PointerDataPacket>(packet_size);
+  auto packet = std::make_unique<flutter::PointerDataPacket>(1);
   packet->SetPointerData(/*index=*/0, pointer_data);
 
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
@@ -1651,7 +1646,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.device = reinterpret_cast<int64_t>(_pointerInteraction.get());
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.change = flutter::PointerData::Change::kGestureDown;
