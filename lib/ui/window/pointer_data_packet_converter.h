@@ -30,7 +30,7 @@ namespace flutter {
 struct PointerState {
   int64_t pointer_identifier;
   bool is_down;
-  bool is_gesture_down;
+  bool is_flow_active;
   double physical_x;
   double physical_y;
   double pan_x;

@@ -1446,12 +1446,12 @@ inline flutter::PointerData::Change ToPointerDataChange(
       return flutter::PointerData::Change::kRemove;
     case kHover:
       return flutter::PointerData::Change::kHover;
-    case kGestureDown:
-      return flutter::PointerData::Change::kGestureDown;
-    case kGestureMove:
-      return flutter::PointerData::Change::kGestureMove;
-    case kGestureUp:
-      return flutter::PointerData::Change::kGestureUp;
+    case kFlowStart:
+      return flutter::PointerData::Change::kFlowStart;
+    case kFlowUpdate:
+      return flutter::PointerData::Change::kFlowUpdate;
+    case kFlowEnd:
+      return flutter::PointerData::Change::kFlowEnd;
   }
   return flutter::PointerData::Change::kCancel;
 }
@@ -1499,9 +1499,9 @@ inline int64_t PointerDataButtonsForLegacyEvent(
     case flutter::PointerData::Change::kRemove:
     case flutter::PointerData::Change::kHover:
     case flutter::PointerData::Change::kUp:
-    case flutter::PointerData::Change::kGestureDown:
-    case flutter::PointerData::Change::kGestureMove:
-    case flutter::PointerData::Change::kGestureUp:
+    case flutter::PointerData::Change::kFlowStart:
+    case flutter::PointerData::Change::kFlowUpdate:
+    case flutter::PointerData::Change::kFlowEnd:
       return 0;
   }
   return 0;

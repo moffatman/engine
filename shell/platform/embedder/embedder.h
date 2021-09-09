@@ -617,11 +617,11 @@ typedef enum {
   /// The pointer moved while up.
   kHover,
   /// A gesture started on this pointer
-  kGestureDown,
+  kFlowStart,
   /// The gesture updated
-  kGestureMove,
+  kFlowUpdate,
   /// The gesture ended
-  kGestureUp,
+  kFlowEnd,
 } FlutterPointerPhase;
 
 /// The device type that created a pointer event.

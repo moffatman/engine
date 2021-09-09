@@ -639,16 +639,16 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
-void fl_engine_send_pointer_gesture_event(FlEngine* self,
-                                          int64_t device,
-                                          size_t timestamp,
-                                          double x,
-                                          double y,
-                                          FlutterPointerPhase phase,
-                                          double pan_x,
-                                          double pan_y,
-                                          double scale,
-                                          double angle) {
+void fl_engine_send_pointer_flow_event(FlEngine* self,
+                                       int64_t device,
+                                       size_t timestamp,
+                                       double x,
+                                       double y,
+                                       FlutterPointerPhase phase,
+                                       double pan_x,
+                                       double pan_y,
+                                       double scale,
+                                       double angle) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
   if (self->engine == nullptr) {

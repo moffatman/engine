@@ -559,26 +559,26 @@ static gboolean event_box_scroll_event(GtkWidget* widget,
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
     if (event->is_stop) {
-      fl_engine_send_pointer_gesture_event(
+      fl_engine_send_pointer_flow_event(
           view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-          event->x * scale_factor, event->y * scale_factor, kGestureUp,
+          event->x * scale_factor, event->y * scale_factor, kFlowEnd,
           view->pan_x, view->pan_y, 0, 0);
       view->pan_started = FALSE;
     } else {
       if (!view->pan_started) {
         view->pan_x = 0;
         view->pan_y = 0;
-        fl_engine_send_pointer_gesture_event(
+        fl_engine_send_pointer_flow_event(
             view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-            event->x * scale_factor, event->y * scale_factor, kGestureDown, 0,
-            0, 0, 0);
+            event->x * scale_factor, event->y * scale_factor, kFlowStart, 0, 0,
+            0, 0);
         view->pan_started = TRUE;
       }
       view->pan_x += scroll_delta_x;
       view->pan_y += scroll_delta_y;
-      fl_engine_send_pointer_gesture_event(
+      fl_engine_send_pointer_flow_event(
           view->engine, 123123, event->time * kMicrosecondsPerMillisecond,
-          event->x * scale_factor, event->y * scale_factor, kGestureMove,
+          event->x * scale_factor, event->y * scale_factor, kFlowUpdate,
           view->pan_x, view->pan_y, 1, 0);
     }
   } else {
@@ -674,9 +674,9 @@ static void event_box_gesture_rotation_begin(GtkGestureRotate* gesture,
     view->zoom_rotate_started = true;
     view->scale = 1;
     view->angle = 0;
-    fl_engine_send_pointer_gesture_event(
-        view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
-        kGestureDown, 0, 0, 0, 0);
+    fl_engine_send_pointer_flow_event(view->engine, 123123, g_get_real_time(),
+                                      view->last_x, view->last_y, kFlowStart, 0,
+                                      0, 0, 0);
   }
 }
 
@@ -685,9 +685,9 @@ static void event_box_gesture_rotation_update(GtkGestureRotate* widget,
                                               gdouble delta,
                                               FlView* view) {
   view->angle = angle;
-  fl_engine_send_pointer_gesture_event(view->engine, 123123, g_get_real_time(),
-                                       view->last_x, view->last_y, kGestureMove,
-                                       0, 0, view->scale, view->angle);
+  fl_engine_send_pointer_flow_event(view->engine, 123123, g_get_real_time(),
+                                    view->last_x, view->last_y, kFlowUpdate, 0,
+                                    0, view->scale, view->angle);
 }
 
 static void event_box_gesture_rotation_end(GtkGestureRotate* gesture,
@@ -695,9 +695,9 @@ static void event_box_gesture_rotation_end(GtkGestureRotate* gesture,
                                            FlView* view) {
   if (view->zoom_rotate_started) {
     view->zoom_rotate_started = false;
-    fl_engine_send_pointer_gesture_event(view->engine, 123123,
-                                         g_get_real_time(), view->last_x,
-                                         view->last_y, kGestureUp, 0, 0, 0, 0);
+    fl_engine_send_pointer_flow_event(view->engine, 123123, g_get_real_time(),
+                                      view->last_x, view->last_y, kFlowEnd, 0,
+                                      0, 0, 0);
   }
 }
 
@@ -708,9 +708,9 @@ static void event_box_gesture_zoom_begin(GtkGestureZoom* gesture,
     view->zoom_rotate_started = true;
     view->scale = 1;
     view->angle = 0;
-    fl_engine_send_pointer_gesture_event(
-        view->engine, 123123, g_get_real_time(), view->last_x, view->last_y,
-        kGestureDown, 0, 0, 0, 0);
+    fl_engine_send_pointer_flow_event(view->engine, 123123, g_get_real_time(),
+                                      view->last_x, view->last_y, kFlowStart, 0,
+                                      0, 0, 0);
   }
 }
 
@@ -718,9 +718,9 @@ static void event_box_gesture_zoom_update(GtkGestureZoom* widget,
                                           gdouble scale,
                                           FlView* view) {
   view->scale = scale;
-  fl_engine_send_pointer_gesture_event(view->engine, 123123, g_get_real_time(),
-                                       view->last_x, view->last_y, kGestureMove,
-                                       0, 0, view->scale, view->angle);
+  fl_engine_send_pointer_flow_event(view->engine, 123123, g_get_real_time(),
+                                    view->last_x, view->last_y, kFlowUpdate, 0,
+                                    0, view->scale, view->angle);
 }
 
 static void event_box_gesture_zoom_end(GtkGestureZoom* gesture,
@@ -728,9 +728,9 @@ static void event_box_gesture_zoom_end(GtkGestureZoom* gesture,
                                        FlView* view) {
   if (view->zoom_rotate_started) {
     view->zoom_rotate_started = false;
-    fl_engine_send_pointer_gesture_event(view->engine, 123123,
-                                         g_get_real_time(), view->last_x,
-                                         view->last_y, kGestureUp, 0, 0, 0, 0);
+    fl_engine_send_pointer_flow_event(view->engine, 123123, g_get_real_time(),
+                                      view->last_x, view->last_y, kFlowEnd, 0,
+                                      0, 0, 0);
   }
 }
 

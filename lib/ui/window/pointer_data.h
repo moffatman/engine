@@ -42,9 +42,9 @@ struct alignas(8) PointerData {
     kDown,
     kMove,
     kUp,
-    kGestureDown,
-    kGestureMove,
-    kGestureUp,
+    kFlowStart,
+    kFlowUpdate,
+    kFlowEnd,
   };
 
   // Must match the PointerDeviceKind enum in pointer.dart.

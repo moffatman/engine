@@ -25,9 +25,9 @@ public class AndroidTouchProcessor {
     PointerChange.DOWN,
     PointerChange.MOVE,
     PointerChange.UP,
-    PointerChange.GESTURE_DOWN,
-    PointerChange.GESTURE_MOVE,
-    PointerChange.GESTURE_UP
+    PointerChange.FLOW_START,
+    PointerChange.FLOW_UPDATE,
+    PointerChange.FLOW_END
   })
   private @interface PointerChange {
     int CANCEL = 0;
@@ -37,9 +37,9 @@ public class AndroidTouchProcessor {
     int DOWN = 4;
     int MOVE = 5;
     int UP = 6;
-    int GESTURE_DOWN = 7;
-    int GESTURE_MOVE = 8;
-    int GESTURE_UP = 9;
+    int FLOW_START = 7;
+    int FLOW_UPDATE = 8;
+    int FLOW_END = 9;
   }
 
   // Must match the PointerDeviceKind enum in pointer.dart.
@@ -345,7 +345,7 @@ public class AndroidTouchProcessor {
     packet.putDouble(0.0); // angle
 
     if (ongoingPans.containsKey(event.getPointerId(pointerIndex))
-        && getPointerChangeForGesture(pointerChange) == PointerChange.GESTURE_UP) {
+        && getPointerChangeForGesture(pointerChange) == PointerChange.FLOW_END) {
       ongoingPans.remove(event.getPointerId(pointerIndex));
     }
   }
@@ -385,11 +385,11 @@ public class AndroidTouchProcessor {
   @PointerChange
   private int getPointerChangeForGesture(int pointerChange) {
     if (pointerChange == PointerChange.DOWN) {
-      return PointerChange.GESTURE_DOWN;
+      return PointerChange.FLOW_START;
     } else if (pointerChange == PointerChange.MOVE) {
-      return PointerChange.GESTURE_MOVE;
+      return PointerChange.FLOW_UPDATE;
     } else if (pointerChange == PointerChange.UP || pointerChange == PointerChange.CANCEL) {
-      return PointerChange.GESTURE_UP;
+      return PointerChange.FLOW_END;
     }
     Log.e("AndroidTouchProcessor", "Unexpected pointerChangeForGesture: " + pointerChange);
     return -1;

@@ -208,7 +208,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         converted_pointers.push_back(pointer_data);
         break;
       }
-      case PointerData::Change::kGestureDown: {
+      case PointerData::Change::kFlowStart: {
         // Makes sure we have an existing pointer
         auto iter = states_.find(pointer_data.device);
         PointerState state;
@@ -224,7 +224,7 @@ void PointerDataPacketConverter::ConvertPointerData(
           state = iter->second;
         }
         FML_DCHECK(!state.is_down);
-        FML_DCHECK(!state.is_gesture_down);
+        FML_DCHECK(!state.is_flow_active);
         if (LocationNeedsUpdate(pointer_data, state)) {
           // Synthesizes a hover event if the location does not match.
           PointerData synthesized_hover_event = pointer_data;
@@ -237,7 +237,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         }
 
         UpdatePointerIdentifier(pointer_data, state, true);
-        state.is_gesture_down = true;
+        state.is_flow_active = true;
         state.pan_x = 0;
         state.pan_y = 0;
         state.scale = 1;
@@ -246,55 +246,33 @@ void PointerDataPacketConverter::ConvertPointerData(
         converted_pointers.push_back(pointer_data);
         break;
       }
-      case PointerData::Change::kGestureMove: {
-        // Makes sure we have an existing pointer in gesture_down state
+      case PointerData::Change::kFlowUpdate: {
+        // Makes sure we have an existing pointer in flow_active state
         auto iter = states_.find(pointer_data.device);
         FML_DCHECK(iter != states_.end());
         PointerState state = iter->second;
         FML_DCHECK(!state.is_down);
-        FML_DCHECK(state.is_gesture_down);
+        FML_DCHECK(state.is_flow_active);
 
         UpdatePointerIdentifier(pointer_data, state, false);
         UpdateDeltaAndState(pointer_data, state);
 
-        /*
-        // Split into ~1 px chunks to fix competition between pan and scale
-        int max_step = std::max(
-            1, (int)std::ceil(std::fmax(std::abs(pointer_data.pan_delta_x),
-                                        std::abs(pointer_data.pan_delta_y))));
-        double pan_step_x = pointer_data.pan_delta_x / max_step;
-        double pan_step_y = pointer_data.pan_delta_y / max_step;
-        double pan_x = pointer_data.pan_x - pointer_data.pan_delta_x;
-        double pan_y = pointer_data.pan_y - pointer_data.pan_delta_y;
-        for (int i = 0; i < max_step; i++) {
-          pan_x += pan_step_x;
-          pan_y += pan_step_y;
-          PointerData synthesized_event = pointer_data;
-          synthesized_event.pan_delta_x = pan_step_x;
-          synthesized_event.pan_delta_y = pan_step_y;
-          synthesized_event.pan_x = pan_x;
-          synthesized_event.pan_y = pan_y;
-          synthesized_event.synthesized =
-              i !=
-              0;  // Mark the first as "real" to allow velocity trackers to work
-          converted_pointers.push_back(synthesized_event);
-        }*/
         converted_pointers.push_back(pointer_data);
         break;
       }
-      case PointerData::Change::kGestureUp: {
-        // Makes sure we have an existing pointer in gesture_down state
+      case PointerData::Change::kFlowEnd: {
+        // Makes sure we have an existing pointer in flow_active state
         auto iter = states_.find(pointer_data.device);
         FML_DCHECK(iter != states_.end());
         PointerState state = iter->second;
-        FML_DCHECK(state.is_gesture_down);
+        FML_DCHECK(state.is_flow_active);
 
         UpdatePointerIdentifier(pointer_data, state, false);
 
         if (LocationNeedsUpdate(pointer_data, state)) {
-          // Synthesizes a gestureMove event if the location does not match.
+          // Synthesizes an update event if the location does not match.
           PointerData synthesized_move_event = pointer_data;
-          synthesized_move_event.change = PointerData::Change::kGestureMove;
+          synthesized_move_event.change = PointerData::Change::kFlowUpdate;
           synthesized_move_event.pan_x = state.pan_x;
           synthesized_move_event.pan_y = state.pan_y;
           synthesized_move_event.pan_delta_x = 0;
@@ -307,7 +285,7 @@ void PointerDataPacketConverter::ConvertPointerData(
           converted_pointers.push_back(synthesized_move_event);
         }
 
-        state.is_gesture_down = false;
+        state.is_flow_active = false;
         states_[pointer_data.device] = state;
         converted_pointers.push_back(pointer_data);
         break;
@@ -366,7 +344,7 @@ PointerState PointerDataPacketConverter::EnsurePointerState(
   PointerState state;
   state.pointer_identifier = 0;
   state.is_down = false;
-  state.is_gesture_down = false;
+  state.is_flow_active = false;
   state.physical_x = pointer_data.physical_x;
   state.physical_y = pointer_data.physical_y;
   state.pan_x = pointer_data.pan_x;

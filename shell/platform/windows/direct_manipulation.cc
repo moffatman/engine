@@ -31,8 +31,7 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
         POINT point;
         GetCursorPos(&point);
         ScreenToClient(window_->GetWindowHandle(), &point);
-        owner_->binding_handler_delegate->OnPointerGestureStart(point.x,
-                                                                point.y);
+        owner_->binding_handler_delegate->OnPointerFlowStart(point.x, point.y);
       }
     }
   } else if (previous == DIRECTMANIPULATION_RUNNING) {
@@ -43,7 +42,7 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
         POINT point;
         GetCursorPos(&point);
         ScreenToClient(window_->GetWindowHandle(), &point);
-        owner_->binding_handler_delegate->OnPointerGestureEnd(point.x, point.y);
+        owner_->binding_handler_delegate->OnPointerFlowEnd(point.x, point.y);
       }
       // Need to reset the content transform
       // Use resetting_ flag to prevent sending reset also to the framework
@@ -85,7 +84,7 @@ HRESULT DirectManipulationEventHandler::OnContentUpdated(
       POINT point;
       GetCursorPos(&point);
       ScreenToClient(window_->GetWindowHandle(), &point);
-      owner_->binding_handler_delegate->OnPointerGestureUpdate(
+      owner_->binding_handler_delegate->OnPointerFlowUpdate(
           point.x, point.y, pan_x, pan_y, scale, 0);
     }
   }

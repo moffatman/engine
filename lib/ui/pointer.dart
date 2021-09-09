@@ -37,14 +37,14 @@ enum PointerChange {
   /// The pointer has stopped making contact with the device.
   up,
 
-  /// A platform gesture has started
-  gestureDown,
+  /// An offscreen interaction gesture has started (such as trackpad gesture)
+  flowStart,
 
-  /// A platform gesture has updated
-  gestureMove,
+  /// An offscreen interaction has changed
+  flowUpdate,
 
-  /// A platform gesture has ended
-  gestureUp,
+  /// An offscreen interaction has ended
+  flowEnd,
 }
 
 /// The kind of pointer device.

@@ -925,10 +925,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       case flutter::PointerData::Change::kRemove:
         // We don't use kAdd/kRemove.
         break;
-      case flutter::PointerData::Change::kGestureDown:
-      case flutter::PointerData::Change::kGestureMove:
-      case flutter::PointerData::Change::kGestureUp:
-        // We don't send gesture events here
+      case flutter::PointerData::Change::kFlowStart:
+      case flutter::PointerData::Change::kFlowUpdate:
+      case flutter::PointerData::Change::kFlowEnd:
+        // We don't send flow events here
         break;
     }
 
@@ -1622,9 +1622,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
-    pointer_data.change = flutter::PointerData::Change::kGestureDown;
+    pointer_data.change = flutter::PointerData::Change::kFlowStart;
   } else if (recognizer.state == UIGestureRecognizerStateChanged) {
-    pointer_data.change = flutter::PointerData::Change::kGestureMove;
+    pointer_data.change = flutter::PointerData::Change::kFlowUpdate;
     pointer_data.pan_x = translation.x;
     pointer_data.pan_y = translation.y;
     pointer_data.pan_delta_x = 0;  // Delta will be generated in pointer_data_packet_converter.cc.
@@ -1633,7 +1633,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     _mouseState.last_translation = translation;
   } else {
     _mouseState.last_translation = CGPointZero;
-    pointer_data.change = flutter::PointerData::Change::kGestureUp;
+    pointer_data.change = flutter::PointerData::Change::kFlowEnd;
   }
 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
@@ -1648,13 +1648,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
-    pointer_data.change = flutter::PointerData::Change::kGestureDown;
+    pointer_data.change = flutter::PointerData::Change::kFlowStart;
   } else if (recognizer.state == UIGestureRecognizerStateChanged) {
-    pointer_data.change = flutter::PointerData::Change::kGestureMove;
+    pointer_data.change = flutter::PointerData::Change::kFlowUpdate;
     pointer_data.scale = recognizer.scale;
     pointer_data.angle = _rotationGestureRecognizer.get().rotation;
   } else {
-    pointer_data.change = flutter::PointerData::Change::kGestureUp;
+    pointer_data.change = flutter::PointerData::Change::kFlowEnd;
   }
 
   packet->SetPointerData(/*index=*/0, pointer_data);

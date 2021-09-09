@@ -118,18 +118,18 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                       int32_t device_id = 0) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerGestureStart(double x, double y) override;
+  virtual void OnPointerFlowStart(double x, double y) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerGestureUpdate(double x,
-                                      double y,
-                                      double pan_x,
-                                      double pan_y,
-                                      double scale,
-                                      double angle) override;
+  virtual void OnPointerFlowUpdate(double x,
+                                   double y,
+                                   double pan_x,
+                                   double pan_y,
+                                   double scale,
+                                   double angle) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerGestureEnd(double x, double y) override;
+  virtual void OnPointerFlowEnd(double x, double y) override;
 
   // |WindowBindingHandlerDelegate|
   void OnText(const std::u16string&) override;
@@ -238,16 +238,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // event is called.
   void SendPointerLeave(PointerState* state);
 
-  void SendPointerGestureDown(double x, double y);
+  void SendPointerFlowStart(double x, double y);
 
-  void SendPointerGestureMove(double x,
-                              double y,
-                              double pan_x,
-                              double pan_y,
-                              double scale,
-                              double angle);
+  void SendPointerFlowUpdate(double x,
+                             double y,
+                             double pan_x,
+                             double pan_y,
+                             double scale,
+                             double angle);
 
-  void SendPointerGestureUp(double x, double y);
+  void SendPointerFlowEnd(double x, double y);
 
   // Reports a keyboard character to Flutter engine.
   void SendText(const std::u16string&);
