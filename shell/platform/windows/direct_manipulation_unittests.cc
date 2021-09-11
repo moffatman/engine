@@ -87,9 +87,10 @@ TEST(DirectManipulationTest, TestGesture) {
   const int DISPLAY_WIDTH = 800;
   const int DISPLAY_HEIGHT = 600;
   auto owner = std::make_unique<DirectManipulationOwner>(nullptr);
+  int32_t device_id = reinterpret_cast<int32_t>(owner.get());
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler = fml::MakeRefCounted<DirectManipulationEventHandler>(nullptr, owner.get());
-  EXPECT_CALL(delegate, OnPointerFlowStart());
+  EXPECT_CALL(delegate, OnPointerFlowStart(device_id));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport, DIRECTMANIPULATION_RUNNING, DIRECTMANIPULATION_READY);
   EXPECT_CALL(content, GetContentTransform(_, 6)).WillOnce(::testing::Invoke(
     [scale, pan_x, pan_y] (float* transform, DWORD size)
@@ -100,9 +101,9 @@ TEST(DirectManipulationTest, TestGesture) {
         return S_OK;
     }
   ));
-  EXPECT_CALL(delegate, OnPointerFlowUpdate(pan_x, pan_y, scale_rounded, 0));
+  EXPECT_CALL(delegate, OnPointerFlowUpdate(device_id, pan_x, pan_y, scale_rounded, 0));
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport, (IDirectManipulationContent*)&content);
-  EXPECT_CALL(delegate, OnPointerFlowEnd());
+  EXPECT_CALL(delegate, OnPointerFlowEnd(device_id));
   EXPECT_CALL(viewport, GetViewportRect(_)).WillOnce(::testing::Invoke(
     [DISPLAY_WIDTH, DISPLAY_HEIGHT] (RECT* rect) {
       rect->left = 0;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/fml/logging.h"
-
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 #include <chrono>
@@ -210,22 +208,23 @@ void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind,
   SendPointerLeave(GetOrCreatePointerState(device_kind, device_id));
 }
 
-void FlutterWindowsView::OnPointerFlowStart() {
+void FlutterWindowsView::OnPointerFlowStart(int32_t device_id) {
   POINT point = GetCursorPosition();
-  SendPointerFlowStart(point.x, point.y);
+  SendPointerFlowStart(device_id, point.x, point.y);
 }
 
-void FlutterWindowsView::OnPointerFlowUpdate(double pan_x,
+void FlutterWindowsView::OnPointerFlowUpdate(int32_t device_id,
+                                             double pan_x,
                                              double pan_y,
                                              double scale,
                                              double angle) {
   POINT point = GetCursorPosition();
-  SendPointerFlowUpdate(point.x, point.y, pan_x, pan_y, scale, angle);
+  SendPointerFlowUpdate(device_id, point.x, point.y, pan_x, pan_y, scale, angle);
 }
 
-void FlutterWindowsView::OnPointerFlowEnd() {
+void FlutterWindowsView::OnPointerFlowEnd(int32_t device_id) {
   POINT point = GetCursorPosition();
-  SendPointerFlowEnd(point.x, point.y);
+  SendPointerFlowEnd(device_id, point.x, point.y);
 }
 
 void FlutterWindowsView::OnText(const std::u16string& text) {
@@ -373,8 +372,8 @@ void FlutterWindowsView::SendPointerLeave(PointerState* state) {
   SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerFlowStart(double x, double y) {
-  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, 0);
+void FlutterWindowsView::SendPointerFlowStart(int32_t device_id, double x, double y) {
+  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
@@ -382,13 +381,14 @@ void FlutterWindowsView::SendPointerFlowStart(double x, double y) {
   SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerFlowUpdate(double x,
+void FlutterWindowsView::SendPointerFlowUpdate(int32_t device_id,
+                                               double x,
                                                double y,
                                                double pan_x,
                                                double pan_y,
                                                double scale,
                                                double angle) {
-  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, 0);
+  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
@@ -400,8 +400,8 @@ void FlutterWindowsView::SendPointerFlowUpdate(double x,
   SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerFlowEnd(double x, double y) {
-  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, 0);
+void FlutterWindowsView::SendPointerFlowEnd(int32_t device_id, double x, double y) {
+  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;

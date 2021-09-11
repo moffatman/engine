@@ -32,7 +32,7 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
   if (current == DIRECTMANIPULATION_RUNNING) {
     if (!resetting_) {
       if (owner_->binding_handler_delegate) {
-        owner_->binding_handler_delegate->OnPointerFlowStart();
+        owner_->binding_handler_delegate->OnPointerFlowStart(reinterpret_cast<int32_t>(this));
       }
     }
   } else if (previous == DIRECTMANIPULATION_RUNNING) {
@@ -40,7 +40,7 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
       resetting_ = false;
     } else {
       if (owner_->binding_handler_delegate) {
-        owner_->binding_handler_delegate->OnPointerFlowEnd();
+        owner_->binding_handler_delegate->OnPointerFlowEnd(reinterpret_cast<int32_t>(this));
       }
       // Need to reset the content transform
       // Use resetting_ flag to prevent sending reset also to the framework
@@ -76,14 +76,15 @@ HRESULT DirectManipulationEventHandler::OnContentUpdated(
     return S_OK;
   }
   if (!resetting_) {
-    int mantissa_bits_chop = 2;
-    float factor = (1 << mantissa_bits_chop) + 1;
-    float c = factor * transform[0];
-    float scale = c - (c - transform[0]);
+    //int mantissa_bits_chop = 2;
+    //float factor = (1 << mantissa_bits_chop) + 1;
+    //float c = factor * transform[0];
+    //float scale = c - (c - transform[0]);
+    float scale = transform[0];
     float pan_x = transform[4];
     float pan_y = transform[5];
     if (owner_->binding_handler_delegate) {
-      owner_->binding_handler_delegate->OnPointerFlowUpdate(pan_x, pan_y, scale, 0);
+      owner_->binding_handler_delegate->OnPointerFlowUpdate(reinterpret_cast<int32_t>(this), pan_x, pan_y, scale, 0);
     }
   }
   return S_OK;

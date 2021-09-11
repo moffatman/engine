@@ -118,16 +118,17 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                       int32_t device_id = 0) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerFlowStart() override;
+  virtual void OnPointerFlowStart(int32_t device_id) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerFlowUpdate(double pan_x,
+  virtual void OnPointerFlowUpdate(int32_t device_id,
+                                   double pan_x,
                                    double pan_y,
                                    double scale,
                                    double angle) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerFlowEnd() override;
+  virtual void OnPointerFlowEnd(int32_t device_id) override;
 
   // |WindowBindingHandlerDelegate|
   void OnText(const std::u16string&) override;
@@ -236,16 +237,17 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // event is called.
   void SendPointerLeave(PointerState* state);
 
-  void SendPointerFlowStart(double x, double y);
+  void SendPointerFlowStart(int32_t device_id, double x, double y);
 
-  void SendPointerFlowUpdate(double x,
+  void SendPointerFlowUpdate(int32_t device_id,
+                             double x,
                              double y,
                              double pan_x,
                              double pan_y,
                              double scale,
                              double angle);
 
-  void SendPointerFlowEnd(double x, double y);
+  void SendPointerFlowEnd(int32_t device_id, double x, double y);
 
   // Reports a keyboard character to Flutter engine.
   void SendText(const std::u16string&);
