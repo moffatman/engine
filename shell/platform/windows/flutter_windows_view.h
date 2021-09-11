@@ -118,18 +118,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                       int32_t device_id = 0) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerFlowStart(double x, double y) override;
+  virtual void OnPointerFlowStart() override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerFlowUpdate(double x,
-                                   double y,
-                                   double pan_x,
+  virtual void OnPointerFlowUpdate(double pan_x,
                                    double pan_y,
                                    double scale,
                                    double angle) override;
 
   // |WindowBindingHandlerDelegate|
-  virtual void OnPointerFlowEnd(double x, double y) override;
+  virtual void OnPointerFlowEnd() override;
 
   // |WindowBindingHandlerDelegate|
   void OnText(const std::u16string&) override;
@@ -308,6 +306,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // needed before passing on to engine.
   void SendPointerEventWithData(const FlutterPointerEvent& event_data,
                                 PointerState* state);
+
+  // Gets the current cursor position to set on trackpad gesture events
+  POINT GetCursorPosition();
 
   // Currently configured WindowsRenderTarget for this view used by
   // surface_manager for creation of render surfaces and bound to the physical

@@ -45,14 +45,12 @@ class WindowBindingHandlerDelegate {
   virtual void OnPointerLeave(FlutterPointerDeviceKind device_kind,
                               int32_t device_id) = 0;
 
-  virtual void OnPointerFlowStart(double x, double y) = 0;
-  virtual void OnPointerFlowUpdate(double x,
-                                   double y,
-                                   double pan_x,
+  virtual void OnPointerFlowStart() = 0;
+  virtual void OnPointerFlowUpdate(double pan_x,
                                    double pan_y,
                                    double scale,
                                    double angle) = 0;
-  virtual void OnPointerFlowEnd(double x, double y) = 0;
+  virtual void OnPointerFlowEnd() = 0;
 
   // Notifies delegate that backing window has received text.
   // Typically called by currently configured WindowBindingHandler

@@ -1,5 +1,9 @@
-#ifndef FLUTTER_SHELL_PLATFORMwindow_S_DIRECT_MANIPULATION_H_
-#define FLUTTER_SHELL_PLATFORMwindow_S_DIRECT_MANIPULATION_H_
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_DIRECT_MANIPULATION_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_DIRECT_MANIPULATION_H_
 
 #include "flutter/fml/memory/ref_counted.h"
 
@@ -76,4 +80,4 @@ class DirectManipulationEventHandler
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORMwindow_S_DIRECT_MANIPULATION_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_DIRECT_MANIPULATION_H_

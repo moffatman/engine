@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "flutter/fml/logging.h"
 
 #include "flutter/shell/platform/windows/direct_manipulation.h"
@@ -28,10 +32,7 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
   if (current == DIRECTMANIPULATION_RUNNING) {
     if (!resetting_) {
       if (owner_->binding_handler_delegate) {
-        POINT point;
-        GetCursorPos(&point);
-        ScreenToClient(window_->GetWindowHandle(), &point);
-        owner_->binding_handler_delegate->OnPointerFlowStart(point.x, point.y);
+        owner_->binding_handler_delegate->OnPointerFlowStart();
       }
     }
   } else if (previous == DIRECTMANIPULATION_RUNNING) {
@@ -39,20 +40,21 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
       resetting_ = false;
     } else {
       if (owner_->binding_handler_delegate) {
-        POINT point;
-        GetCursorPos(&point);
-        ScreenToClient(window_->GetWindowHandle(), &point);
-        owner_->binding_handler_delegate->OnPointerFlowEnd(point.x, point.y);
+        owner_->binding_handler_delegate->OnPointerFlowEnd();
       }
       // Need to reset the content transform
       // Use resetting_ flag to prevent sending reset also to the framework
       resetting_ = true;
       RECT rect;
-      viewport->GetViewportRect(&rect);
-      HRESULT hr = viewport->ZoomToRect(rect.left, rect.top, rect.right,
-                                        rect.bottom, false);
+      HRESULT hr = viewport->GetViewportRect(&rect);
+      if (FAILED(hr)) {
+        FML_LOG(ERROR) << "Failed to get the current viewport rect";
+        return E_FAIL;
+      }
+      hr = viewport->ZoomToRect(rect.left, rect.top, rect.right, rect.bottom, false);
       if (FAILED(hr)) {
         FML_LOG(ERROR) << "Failed to reset the gesture using ZoomToRect";
+        return E_FAIL;
       }
     }
   }
@@ -81,11 +83,7 @@ HRESULT DirectManipulationEventHandler::OnContentUpdated(
     float pan_x = transform[4];
     float pan_y = transform[5];
     if (owner_->binding_handler_delegate) {
-      POINT point;
-      GetCursorPos(&point);
-      ScreenToClient(window_->GetWindowHandle(), &point);
-      owner_->binding_handler_delegate->OnPointerFlowUpdate(
-          point.x, point.y, pan_x, pan_y, scale, 0);
+      owner_->binding_handler_delegate->OnPointerFlowUpdate(pan_x, pan_y, scale, 0);
     }
   }
   return S_OK;

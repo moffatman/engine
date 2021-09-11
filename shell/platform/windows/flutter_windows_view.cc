@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/logging.h"
+
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 #include <chrono>
@@ -208,21 +210,22 @@ void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind,
   SendPointerLeave(GetOrCreatePointerState(device_kind, device_id));
 }
 
-void FlutterWindowsView::OnPointerFlowStart(double x, double y) {
-  SendPointerFlowStart(x, y);
+void FlutterWindowsView::OnPointerFlowStart() {
+  POINT point = GetCursorPosition();
+  SendPointerFlowStart(point.x, point.y);
 }
 
-void FlutterWindowsView::OnPointerFlowUpdate(double x,
-                                             double y,
-                                             double pan_x,
+void FlutterWindowsView::OnPointerFlowUpdate(double pan_x,
                                              double pan_y,
                                              double scale,
                                              double angle) {
-  SendPointerFlowUpdate(x, y, pan_x, pan_y, scale, angle);
+  POINT point = GetCursorPosition();
+  SendPointerFlowUpdate(point.x, point.y, pan_x, pan_y, scale, angle);
 }
 
-void FlutterWindowsView::OnPointerFlowEnd(double x, double y) {
-  SendPointerFlowEnd(x, y);
+void FlutterWindowsView::OnPointerFlowEnd() {
+  POINT point = GetCursorPosition();
+  SendPointerFlowEnd(point.x, point.y);
 }
 
 void FlutterWindowsView::OnText(const std::u16string& text) {
@@ -596,6 +599,13 @@ PlatformWindow FlutterWindowsView::GetPlatformWindow() const {
 
 FlutterWindowsEngine* FlutterWindowsView::GetEngine() {
   return engine_.get();
+}
+
+POINT FlutterWindowsView::GetCursorPosition() {
+  POINT point;
+  GetCursorPos(&point);
+  ScreenToClient(std::get<0>(*GetRenderTarget()), &point);
+  return point;
 }
 
 }  // namespace flutter
