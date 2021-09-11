@@ -281,32 +281,32 @@ class PointerData {
   final double scrollDeltaY;
 
   /// For events with change of PointerChange.flowUpdate:
-  /// 
+  ///
   /// The current panning magnitude of the gesture in the x direction, in physical pixels.
   final double panX;
 
   /// For events with change of PointerChange.flowUpdate:
-  /// 
+  ///
   /// The current panning magnitude of the gesture in the x direction, in physical pixels.
   final double panY;
 
   /// For events with change of PointerChange.flowUpdate:
-  /// 
+  ///
   /// The difference in panning of the gesture in the x direction since the latest flowUpdate event, in physical pixels.
   final double panDeltaX;
 
   /// For events with change of PointerChange.flowUpdate:
-  /// 
+  ///
   /// The difference in panning of the gesture in the y direction since the last flowUpdate event, in physical pixels.
   final double panDeltaY;
 
   /// For events with change of PointerChange.flowUpdate:
-  /// 
+  ///
   /// The current scale of the gesture (unitless), with 1.0 as the initial scale.
   final double scale;
 
   /// For events with change of PointerChange.flowUpdate:
-  /// 
+  ///
   /// The current angle of the gesture in radians, with 0.0 as the initial angle.
   final double angle;
 

@@ -219,7 +219,8 @@ void FlutterWindowsView::OnPointerFlowUpdate(int32_t device_id,
                                              double scale,
                                              double angle) {
   POINT point = GetCursorPosition();
-  SendPointerFlowUpdate(device_id, point.x, point.y, pan_x, pan_y, scale, angle);
+  SendPointerFlowUpdate(device_id, point.x, point.y, pan_x, pan_y, scale,
+                        angle);
 }
 
 void FlutterWindowsView::OnPointerFlowEnd(int32_t device_id) {
@@ -372,8 +373,11 @@ void FlutterWindowsView::SendPointerLeave(PointerState* state) {
   SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerFlowStart(int32_t device_id, double x, double y) {
-  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
+void FlutterWindowsView::SendPointerFlowStart(int32_t device_id,
+                                              double x,
+                                              double y) {
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
@@ -388,7 +392,8 @@ void FlutterWindowsView::SendPointerFlowUpdate(int32_t device_id,
                                                double pan_y,
                                                double scale,
                                                double angle) {
-  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
@@ -400,8 +405,11 @@ void FlutterWindowsView::SendPointerFlowUpdate(int32_t device_id,
   SendPointerEventWithData(event, state);
 }
 
-void FlutterWindowsView::SendPointerFlowEnd(int32_t device_id, double x, double y) {
-  auto state = GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
+void FlutterWindowsView::SendPointerFlowEnd(int32_t device_id,
+                                            double x,
+                                            double y) {
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTouch, device_id);
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;

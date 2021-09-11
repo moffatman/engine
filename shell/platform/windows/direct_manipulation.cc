@@ -32,7 +32,8 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
   if (current == DIRECTMANIPULATION_RUNNING) {
     if (!resetting_) {
       if (owner_->binding_handler_delegate) {
-        owner_->binding_handler_delegate->OnPointerFlowStart(reinterpret_cast<int32_t>(this));
+        owner_->binding_handler_delegate->OnPointerFlowStart(
+            reinterpret_cast<int32_t>(this));
       }
     }
   } else if (previous == DIRECTMANIPULATION_RUNNING) {
@@ -40,7 +41,8 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
       resetting_ = false;
     } else {
       if (owner_->binding_handler_delegate) {
-        owner_->binding_handler_delegate->OnPointerFlowEnd(reinterpret_cast<int32_t>(this));
+        owner_->binding_handler_delegate->OnPointerFlowEnd(
+            reinterpret_cast<int32_t>(this));
       }
       // Need to reset the content transform
       // Use resetting_ flag to prevent sending reset also to the framework
@@ -51,7 +53,8 @@ HRESULT DirectManipulationEventHandler::OnViewportStatusChanged(
         FML_LOG(ERROR) << "Failed to get the current viewport rect";
         return E_FAIL;
       }
-      hr = viewport->ZoomToRect(rect.left, rect.top, rect.right, rect.bottom, false);
+      hr = viewport->ZoomToRect(rect.left, rect.top, rect.right, rect.bottom,
+                                false);
       if (FAILED(hr)) {
         FML_LOG(ERROR) << "Failed to reset the gesture using ZoomToRect";
         return E_FAIL;
@@ -76,15 +79,19 @@ HRESULT DirectManipulationEventHandler::OnContentUpdated(
     return S_OK;
   }
   if (!resetting_) {
-    //int mantissa_bits_chop = 2;
-    //float factor = (1 << mantissa_bits_chop) + 1;
-    //float c = factor * transform[0];
-    //float scale = c - (c - transform[0]);
-    float scale = transform[0];
+    // DirectManipulation provides updates with very high precision. If the user
+    // holds their fingers steady on a trackpad, DirectManipulation sends
+    // jittery updates. This calculation will reduce the precision of the scale
+    // value of the event to avoid jitter
+    const int mantissa_bits_chop = 2;
+    const float factor = (1 << mantissa_bits_chop) + 1;
+    float c = factor * transform[0];
+    float scale = c - (c - transform[0]);
     float pan_x = transform[4];
     float pan_y = transform[5];
     if (owner_->binding_handler_delegate) {
-      owner_->binding_handler_delegate->OnPointerFlowUpdate(reinterpret_cast<int32_t>(this), pan_x, pan_y, scale, 0);
+      owner_->binding_handler_delegate->OnPointerFlowUpdate(
+          reinterpret_cast<int32_t>(this), pan_x, pan_y, scale, 0);
     }
   }
   return S_OK;
