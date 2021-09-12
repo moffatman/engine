@@ -1569,8 +1569,9 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     }
     pointer_data.pan_x = SAFE_ACCESS(current, pan_x, 0.0);
     pointer_data.pan_y = SAFE_ACCESS(current, pan_y, 0.0);
-    pointer_data.pan_delta_x = SAFE_ACCESS(current, pan_delta_x, 0.0);
-    pointer_data.pan_delta_y = SAFE_ACCESS(current, pan_delta_y, 0.0);
+    // Delta will be generated in pointer_data_packet_converter.cc.
+    pointer_data.pan_delta_x = 0.0;
+    pointer_data.pan_delta_y = 0.0;
     pointer_data.scale = SAFE_ACCESS(current, scale, 0.0);
     pointer_data.angle = SAFE_ACCESS(current, angle, 0.0);
     packet->SetPointerData(i, pointer_data);

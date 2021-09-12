@@ -663,10 +663,6 @@ void fl_engine_send_pointer_flow_event(FlEngine* self,
   fl_event.phase = phase;
   fl_event.pan_x = pan_x;
   fl_event.pan_y = pan_y;
-  fl_event.pan_delta_x =
-      0;  // Delta will be generated in pointer_data_packet_converter.cc.
-  fl_event.pan_delta_y =
-      0;  // Delta will be generated in pointer_data_packet_converter.cc.
   fl_event.scale = scale;
   fl_event.angle = angle;
   fl_event.device = device;

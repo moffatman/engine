@@ -677,11 +677,13 @@ typedef struct {
   FlutterPointerDeviceKind device_kind;
   /// The buttons currently pressed, if any.
   int64_t buttons;
+  /// The x offset of the gesture in physical pixels.
   double pan_x;
+  /// The y offset of the gesture in physical pixels.
   double pan_y;
-  double pan_delta_x;
-  double pan_delta_y;
+  /// The scale of the gesture, where 1.0 is the initial scale.
   double scale;
+  /// The angle of the gesture in radians, where 0.0 is the initial angle.
   double angle;
 } FlutterPointerEvent;
 
