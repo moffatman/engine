@@ -152,10 +152,10 @@ TEST(DirectManipulationTest, TestGesture) {
   const int DISPLAY_WIDTH = 800;
   const int DISPLAY_HEIGHT = 600;
   auto owner = std::make_unique<DirectManipulationOwner>(nullptr);
-  int32_t device_id = reinterpret_cast<int32_t>(owner.get());
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler =
       fml::MakeRefCounted<DirectManipulationEventHandler>(nullptr, owner.get());
+  int32_t device_id = reinterpret_cast<int32_t>(handler.get());
   EXPECT_CALL(delegate, OnPointerFlowStart(device_id));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport,
                                    DIRECTMANIPULATION_RUNNING,
