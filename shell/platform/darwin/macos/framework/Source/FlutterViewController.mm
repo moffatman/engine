@@ -612,6 +612,10 @@ static void CommonInit(FlutterViewController* controller) {
 
   NSPoint locationInView = [self.flutterView convertPoint:event.locationInWindow fromView:nil];
   NSPoint locationInBackingCoordinates = [self.flutterView convertPointToBacking:locationInView];
+  FlutterPointerDeviceKind deviceKind = kFlutterPointerDeviceKindMouse;
+  if (phase == kPanZoomStart || phase == kPanZoomUpdate || phase == kPanZoomEnd) {
+    deviceKind = kFlutterPointerDeviceKindTrackpad;
+  }
   FlutterPointerEvent flutterEvent = {
       .struct_size = sizeof(flutterEvent),
       .phase = phase,
@@ -619,7 +623,7 @@ static void CommonInit(FlutterViewController* controller) {
       .x = locationInBackingCoordinates.x,
       .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
       .device = kMousePointerDeviceId,
-      .device_kind = kFlutterPointerDeviceKindMouse,
+      .device_kind = deviceKind,
       // If a click triggered a synthesized kAdd, don't pass the buttons in that event.
       .buttons = phase == kAdd ? 0 : _mouseState.buttons,
   };

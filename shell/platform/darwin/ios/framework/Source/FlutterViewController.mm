@@ -1793,7 +1793,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   translation.y *= scale;
 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
+  pointer_data.kind = flutter::PointerData::DeviceKind::kTrackpad;
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.change = flutter::PointerData::Change::kPanZoomStart;
@@ -1820,7 +1820,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
 
   flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
+  pointer_data.kind = flutter::PointerData::DeviceKind::kTrackpad;
   if (recognizer.state == UIGestureRecognizerStateBegan) {
     pointer_data.change = flutter::PointerData::Change::kPanZoomStart;
   } else if (recognizer.state == UIGestureRecognizerStateChanged) {

@@ -763,7 +763,7 @@ void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
   fl_event.scale = scale;
   fl_event.rotation = rotation;
   fl_event.device = kPointerPanZoomDeviceId;
-  fl_event.device_kind = kFlutterPointerDeviceKindTouch;
+  fl_event.device_kind = kFlutterPointerDeviceKindTrackpad;
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
