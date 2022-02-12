@@ -656,11 +656,7 @@ static void CommonInit(FlutterViewController* controller) {
 
     double pixelsPerLine = 1.0;
     if (!event.hasPreciseScrollingDeltas) {
-      CGEventSourceRef source = CGEventCreateSourceFromEvent(event.CGEvent);
-      pixelsPerLine = CGEventSourceGetPixelsPerLine(source);
-      if (source) {
-        CFRelease(source);
-      }
+      pixelsPerLine = 40.0;
     }
     double scaleFactor = self.flutterView.layer.contentsScale;
     flutterEvent.scroll_delta_x = -event.scrollingDeltaX * pixelsPerLine * scaleFactor;

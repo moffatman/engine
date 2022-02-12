@@ -1807,8 +1807,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGPoint translation = [recognizer translationInView:self.view];
   const CGFloat scale = [UIScreen mainScreen].scale;
 
-  translation.x *= scale;
-  translation.y *= scale;
+  translation.x *= scale * 4;
+  translation.y *= scale * 4;
 
   auto packet =
       std::make_unique<flutter::PointerDataPacket>(_mouseState.flutter_state_is_added ? 1 : 2);
