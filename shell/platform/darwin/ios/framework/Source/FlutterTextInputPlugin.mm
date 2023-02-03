@@ -439,7 +439,8 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
                                          BOOL selectionRectIsRTL,
                                          CGRect otherSelectionRect,
                                          BOOL otherSelectionRectIsRTL,
-                                         BOOL checkFarBoundary) {
+                                         BOOL checkFarBoundary,
+                                         CGFloat verticalPrecision) {
   if (CGRectContainsPoint(
           CGRectMake(
               selectionRect.origin.x +
@@ -464,8 +465,8 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // This serves a similar purpose to IsApproximatelyEqual, allowing a little buffer before
   // declaring something closer vertically to account for the small variations in size and position
   // of SelectionRects, especially when dealing with emoji.
-  BOOL isCloserVertically = yDist < yDistOther - 1;
-  BOOL isEqualVertically = IsApproximatelyEqual(yDist, yDistOther, 1);
+  BOOL isCloserVertically = yDist < yDistOther - verticalPrecision;
+  BOOL isEqualVertically = IsApproximatelyEqual(yDist, yDistOther, verticalPrecision);
   BOOL isAboveBottomOfLine = point.y <= selectionRect.origin.y + selectionRect.size.height;
   BOOL isCloserHorizontally = xDist <= xDistOther;
   BOOL isBelowBottomOfLine = point.y > selectionRect.origin.y + selectionRect.size.height;
@@ -749,6 +750,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // becomes the first responder. Typically set to false
   // when the app shows its own in-flutter keyboard.
   bool _isSystemKeyboardEnabled;
+  bool _isFloatingCursorActive;
   CGPoint _floatingCursorOffset;
   bool _enableInteractiveSelection;
   UITextInteraction* _textInteraction API_AVAILABLE(ios(13.0));
@@ -1727,6 +1729,10 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   NSUInteger start = ((FlutterTextPosition*)range.start).index;
   NSUInteger end = ((FlutterTextPosition*)range.end).index;
 
+  // Selecting text using the floating cursor is not as precise as the pencil.
+  // Allow further vertical deviation and base more of the decision on horizontal comparison.
+  CGFloat verticalPrecision = _isFloatingCursorActive ? 10 : 1;
+
   BOOL isFirst = YES;
   CGRect _closestRect = CGRectZero;
   BOOL _closestRectIsRTL = NO;
@@ -1738,7 +1744,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
                          point, _selectionRects[i].rect,
                          _selectionRects[i].writingDirection == NSWritingDirectionRightToLeft,
                          _closestRect, _closestRectIsRTL,
-                         /*checkFarBoundary=*/NO)) {
+                         /*checkFarBoundary=*/NO, verticalPrecision)) {
         isFirst = NO;
         _closestRect = _selectionRects[i].rect;
         _closestRectIsRTL = _selectionRects[i].writingDirection == NSWritingDirectionRightToLeft;
@@ -1754,7 +1760,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
               point, _selectionRects[i].rect,
               _selectionRects[i].writingDirection == NSWritingDirectionRightToLeft, _closestRect,
               _closestRectIsRTL,
-              /*checkFarBoundary=*/YES)) {
+              /*checkFarBoundary=*/YES, verticalPrecision)) {
         _closestPosition = position;
       }
     }
@@ -1784,6 +1790,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // It seems impossible to use a negative "width" or "height", as the "convertRect"
   // call always turns a CGRect's negative dimensions into non-negative values, e.g.,
   // (1, 2, -3, -4) would become (-2, -2, 3, 4).
+  _isFloatingCursorActive = YES;
   _floatingCursorOffset = point;
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateStart
@@ -1802,6 +1809,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (void)endFloatingCursor {
+  _isFloatingCursorActive = NO;
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateEnd
                                     withClient:_textInputClient
