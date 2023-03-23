@@ -790,6 +790,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     _accessibilityEnabled = NO;
     _smartQuotesType = UITextSmartQuotesTypeYes;
     _smartDashesType = UITextSmartDashesTypeYes;
+    FML_LOG(ERROR) << "_selectionRects = [[NSArray alloc] init]";
     _selectionRects = [[NSArray alloc] init];
 
     if (@available(iOS 14.0, *)) {
@@ -1623,6 +1624,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
 - (CGRect)caretRectForPosition:(UITextPosition*)position {
   NSInteger index = ((FlutterTextPosition*)position).index;
+  FML_LOG(ERROR) << "caretRectForPosition:" << index;
   // Get the bounds of the characters before and after the requested caret position.
   NSArray<UITextSelectionRect*>* rects =
       [self selectionRectsForRange:[FlutterTextRange
@@ -1671,6 +1673,8 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (UITextPosition*)closestPositionToPoint:(CGPoint)point {
+  FML_LOG(ERROR) << "closestPositionToPoint:(" << point.x << "," << point.y
+                 << "), [_selectionRects count] = " << [_selectionRects count];
   if ([_selectionRects count] == 0) {
     NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
              @"Expected a FlutterTextPosition for position (got %@).",
@@ -1790,6 +1794,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // It seems impossible to use a negative "width" or "height", as the "convertRect"
   // call always turns a CGRect's negative dimensions into non-negative values, e.g.,
   // (1, 2, -3, -4) would become (-2, -2, 3, 4).
+  FML_LOG(ERROR) << "beginFloatingCursorAtPoint:(" << point.x << "," << point.y << ")";
   _isFloatingCursorActive = YES;
   _floatingCursorOffset = point;
   [self.textInputDelegate flutterTextInputView:self
@@ -1799,6 +1804,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (void)updateFloatingCursorAtPoint:(CGPoint)point {
+  FML_LOG(ERROR) << "updateFloatingCursorAtPoint:(" << point.x << "," << point.y << ")";
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateUpdate
                                     withClient:_textInputClient
@@ -1809,6 +1815,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (void)endFloatingCursor {
+  FML_LOG(ERROR) << "beginFloatingCursorAtPoint";
   _isFloatingCursorActive = NO;
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateEnd
@@ -1927,6 +1934,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
   _scribbleFocusStatus = FlutterScribbleFocusStatusUnfocused;
   [self resetScribbleInteractionStatusIfEnding];
+  FML_LOG(ERROR) << "self.selectionRects = copiedRects with length " << [copiedRects count];
   self.selectionRects = copiedRects;
   _selectionAffinity = kTextAffinityDownstream;
   [self replaceRange:_selectedTextRange withText:text];
@@ -2224,6 +2232,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
                                                 ? NSWritingDirectionLeftToRight
                                                 : NSWritingDirectionRightToLeft]];
   }
+  FML_LOG(ERROR) << "_activeView.selectionRects = rectsAsRect with length " << [rectsAsRect count];
   _activeView.selectionRects = rectsAsRect;
 }
 
@@ -2350,6 +2359,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (autofillId) {
     [_autofillContext removeObjectForKey:autofillId];
   }
+  FML_LOG(ERROR) << "initWithOwner from createInputViewWith";
   FlutterTextInputView* newView = [[FlutterTextInputView alloc] initWithOwner:self];
   [newView configureWithDictionary:configuration];
   [self addToInputParentViewIfNeeded:newView];
@@ -2373,6 +2383,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (!fields) {
     // DO NOT push the current autofillable input fields to the context even
     // if it's password-related, because it is not in an autofill group.
+    FML_LOG(ERROR) << "getOrCreateAutofillableView from updateAndShowAutofillViews 1";
     focused = [self getOrCreateAutofillableView:focusedField isPasswordAutofill:isPassword];
     [_autofillContext removeObjectForKey:focusedId];
   }
@@ -2385,10 +2396,12 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     BOOL isFocused = [focusedId isEqualToString:autofillId];
 
     if (isFocused) {
+      FML_LOG(ERROR) << "getOrCreateAutofillableView from updateAndShowAutofillViews 2";
       focused = [self getOrCreateAutofillableView:field isPasswordAutofill:isPassword];
     }
 
     if (hasHints) {
+      FML_LOG(ERROR) << "getOrCreateAutofillableView from updateAndShowAutofillViews 3";
       // Push the current input field to the context if it has hints.
       _autofillContext[autofillId] = isFocused ? focused
                                                : [self getOrCreateAutofillableView:field
@@ -2415,6 +2428,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (!inputView) {
     inputView =
         needsPasswordAutofill ? [FlutterSecureTextInputView alloc] : [FlutterTextInputView alloc];
+    FML_LOG(ERROR) << "initWithOwner from getOrCreateAutofillableView";
     inputView = [inputView initWithOwner:self];
     [self addToInputParentViewIfNeeded:inputView];
   }
